@@ -26,7 +26,7 @@ class GameScene extends Phaser.Scene {
         //  World size is 8000 x 6000
         this.WORLD_WIDTH = 8000;
         this.WORLD_HEIGHT = 8000;
-        this.MAX_ASTEROIDS = 8000*0.1;
+        this.MAX_ASTEROIDS = this.WORLD_WIDTH*0.1;
 
         this.createBackground();
         this.text = this.add.text(32, 32, { color: '#fff' });
@@ -49,18 +49,6 @@ class GameScene extends Phaser.Scene {
         };
         this.createShip();
         this.createAsteroids();
-
-        this.emitterSmoke = this.add.particles('smoke').createEmitter({
-            x: 400,
-            y: 300,
-            speed: { min: -800, max: 800 },
-            angle: { min: 0, max: 360 },
-            scale: { start: 0.5, end: 0 },
-            blendMode: 'SCREEN',
-            //active: false,
-            lifespan: 600,
-        });
-
     
         this.physics.add.collider(this.ship, this.asteroidsGroup, this.collideShip)
         //this.physics.add.collider(this.asteroidsGroup,this.asteroidsGroup, this.collideAsteroid)        
@@ -122,7 +110,7 @@ class GameScene extends Phaser.Scene {
     createTrail(source){
         var particles = this.add.particles('space');
 
-        var emitter = particles.createEmitter({
+        var emitterTrail = particles.createEmitter({
             frame: 'blue',
             speed: 100,
             lifespan: {
@@ -147,7 +135,7 @@ class GameScene extends Phaser.Scene {
             scale: { start: 0.2, end: 0 },
             blendMode: 'ADD'
         });
-        emitter.startFollow(source);         
+        emitterTrail.startFollow(source);         
     }
 
     createAsteroids(){
@@ -180,27 +168,18 @@ class GameScene extends Phaser.Scene {
             let asteroidType = 'asteroid'+Phaser.Math.RND.integerInRange(1, 4)+'-anim';
             let asteroidX = Phaser.Math.RND.integerInRange(0, this.WORLD_WIDTH);
             let asteroidY = Phaser.Math.RND.integerInRange(0, this.WORLD_HEIGHT);
-            var asteroid = new Asteroid( {scene:this, key: asteroidType, x:asteroidX, y:asteroidY, type:'BIG'} );
-            //console.log('asteroid ('+i+'): '+asteroid);
-            //this.asteroidsGroup.add(asteroid);
-            //this.asteroidsArray.push(asteroid);            
+            var asteroid = new Asteroid( {scene:this, key: asteroidType, x:asteroidX, y:asteroidY, type:'BIG'} );        
         }
         console.log('asteroids: '+this.asteroidsArray.length)    
     } 
 
     collideShip(ship, asteroid){
         console.log('BOOM'); 
-        
-        /*
-        //TODO
-        - add a shield hit animation
-        - remove shield amount by asteroid size or velocity
-        - when shield depleted destroy ship
-        - split asteroid  
-        */
+
         asteroid.createChild();
         asteroid.createChild();
         asteroid.destroy();
+        ship.config.scene.cameras.main.shake(400, 0.005);
     }
 
     collideBullet(bullet, asteroid){
@@ -209,17 +188,11 @@ class GameScene extends Phaser.Scene {
         bullet.destroy();
 
         asteroid.createChild();
-        console.log('emitter: '+this.emitterSmoke);
-        this.emitterSmoke.x = asteroid.x
-        this.emitterSmoke.y = asteroid.y;
-        this.emitterSmoke.explode();
         asteroid.createChild();
         asteroid.createChild();
 
         asteroid.destroy();
 
-        
-        //console.log('cnt: '+this.asteroidsGroup.getChildren());
     }
 
     // not used anymore
@@ -247,10 +220,6 @@ class GameScene extends Phaser.Scene {
             this.text.setPosition(this.ship.x-400, this.ship.y - 400);
             outstr += 'Ship(x:' + this.ship.x.toFixed(2) + ', y:' + this.ship.y.toFixed(2) + ')';
         }
-        outstr += '\n'+this.asteroidsArray[0]
-        outstr += '\n'+this.asteroidsArray[1]
-        outstr += '\n'+this.asteroidsArray[2]
-        outstr += '\n'+this.asteroidsArray[3]
         outstr += '\n'+'asteroids count: '+this.asteroidsGroup.getLength();
         outstr += '\n'+'time: '+time;
         this.text.setText(outstr);

@@ -7,7 +7,7 @@ export default class Ship extends Phaser.GameObjects.Sprite {
         super(config.scene, config.x, config.y, config.texture, config.key);
         config.scene.physics.world.enable(this);
         config.scene.add.existing(this);
-
+        this.config = config;
         this.type = 'ship';
 
         this.setScale(0.5);
