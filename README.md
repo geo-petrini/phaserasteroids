@@ -18,3 +18,20 @@ Better asteoid generation
 
 Radar
 - implement a minimap/radar that shows the asteroids location
+
+Screen
+- implement some kind of game boundaries (wall loop?)
+- resize game screen to fill page (DONE)
+- dynamically resize game screen
+
+Gameplay
+- make asteroids more dangerous (faster by size)
+- asteroid size affects damage to ship
+- improve ship handling
+- implement powerups (buy at station or drops)
+    - handling
+    - speed
+    - slowmotion
+    - fire rate
+    - more blasters
+    - superweapon (seismic bomb/clear radius)

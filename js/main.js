@@ -2,8 +2,8 @@ import "https://cdn.jsdelivr.net/npm/phaser@3.15.1/dist/phaser-arcade-physics.mi
 import BootScene from './scenes/bootscene.js';
 import GameScene from './scenes/gamescene.js';
 
-var SET_WIDTH=1024;
-var SET_HEIGHT=864;
+var SET_WIDTH=window.innerWidth;
+var SET_HEIGHT=window.innerHeight;
 
 const config = {
     // For more settings see <https://github.com/photonstorm/phaser/blob/master/src/boot/Config.js>
