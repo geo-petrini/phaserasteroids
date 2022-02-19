@@ -25,8 +25,9 @@ export default class Ship extends Phaser.GameObjects.Sprite {
         console.log(this);     
     }
 
-    assignBullets(bullets){
+    assignBullets(bullets, bulletSound){
         this.bullets = bullets;
+        this.bulletSound = bulletSound
     }
 
     update(keys, time, delta) {
@@ -75,6 +76,7 @@ export default class Ship extends Phaser.GameObjects.Sprite {
                 {
                     bullet.fire(this);
                     this.lastFired = time + this.fireIntervall;
+                    this.config.scene.sounds['laser'].play();
                 }
             }
         

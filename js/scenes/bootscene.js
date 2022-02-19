@@ -53,6 +53,11 @@ class BootScene extends Phaser.Scene {
         this.load.image('smoke', 'assets/smoke.png');
         this.load.image('blastwave', 'assets/blastwave1.png');
         this.load.image('flame', 'assets/muzzleflash7.png');
+
+        this.load.audio('laser_single',  ['sounds/laser_single.wav']);
+        this.load.audio('sbabaam',  ['sounds/sbabaam.wav']);
+        this.load.audio('explosion_short',  ['sounds/explosion_short.wav']);
+        this.load.audio('asteroid_explosion_1',  ['sounds/asteroid_explosion_1.wav']);
     }
 }
 

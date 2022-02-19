@@ -53,6 +53,8 @@ class GameScene extends Phaser.Scene {
         this.physics.add.collider(this.ship, this.asteroidsGroup, this.collideShip)
         //this.physics.add.collider(this.asteroidsGroup,this.asteroidsGroup, this.collideAsteroid)        
         this.physics.add.collider(this.bullets,this.asteroidsGroup, this.collideBullet)        
+
+        this.createSounds();
     }
 
     createBackground() {
@@ -96,6 +98,7 @@ class GameScene extends Phaser.Scene {
         });
 
         this.cameras.main.startFollow(this.ship);
+        
 
         this.bullets = this.physics.add.group({
             classType: Bullet,
@@ -172,6 +175,15 @@ class GameScene extends Phaser.Scene {
         }
         console.log('asteroids: '+this.asteroidsArray.length)    
     } 
+
+    createSounds(){
+        this.sounds = {}
+
+        this.sounds['laser'] = this.sound.add('laser_single');
+        this.sounds['sbabaam'] = this.sound.add('sbabaam');
+        this.sounds['explosion_short'] = this.sound.add('explosion_short');
+        this.sounds['asteroid_explosion_1'] = this.sound.add('asteroid_explosion_1');
+    }
 
     collideShip(ship, asteroid){
         console.log('BOOM'); 
