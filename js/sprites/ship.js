@@ -18,7 +18,7 @@ export default class Ship extends Phaser.GameObjects.Sprite {
         //his.body.useDamping = true
         this.body.allowDrag = true
         this.body.angularDrag = 150;
-        this.body.acceleration = 5;
+        this.body.acceleration = 50;
         //this.setDrag(200);
         //this.setAngularDrag(150);
         //ship.setMaxVelocity(700);	//wrong axes https://phaser.discourse.group/t/arcade-physics-incorrect-velocity-vector-when-trying-to-fly-forward/4126        
