@@ -2,6 +2,8 @@ import Ship from '../sprites/ship.js'
 import Bullet from '../sprites/bullet.js'
 import Asteroid from '../sprites/asteroid.js';
 
+import Menu from './menu.js';
+
 
 class GameScene extends Phaser.Scene {
     asteroidsArray = [];
@@ -14,9 +16,12 @@ class GameScene extends Phaser.Scene {
 
     preload() {
         this.canvas = this.sys.game.canvas;
+        this.load.scenePlugin({
+            key: 'rexuiplugin',
+            url: 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexuiplugin.min.js',
+            sceneKey: 'rexUI'
+        });        
     }
-
-    	
 
     create() {
         console.log('gamescene create');
@@ -29,6 +34,7 @@ class GameScene extends Phaser.Scene {
         //this.MAX_ASTEROIDS = this.WORLD_WIDTH*0.1;
         this.MAX_ASTEROIDS = 80;
         this.ASTEROIDS_INITIALITED = false;
+        this.MENU_INITIALITED = false;
 
         this.createBackground();
         this.text = this.add.text(32, 32, { color: '#fff' });
@@ -192,6 +198,8 @@ class GameScene extends Phaser.Scene {
         this.sounds['asteroid_explosion_1'] = this.sound.add('asteroid_explosion_1');
     }
 
+    
+
     collideShipAsteroid(ship, asteroid){
         console.log('BOOM'); 
 
@@ -231,6 +239,7 @@ class GameScene extends Phaser.Scene {
 
 
 
+
     updateScore(score, time) {
         //this.text.setPosition(ship.x, ship.y - 30);
         var outstr = "";
@@ -253,6 +262,11 @@ class GameScene extends Phaser.Scene {
             this.createAsteroids()
             this.ASTEROIDS_INITIALITED = true;
         }
+        if (this.MENU_INITIALITED == false){
+            //this.menu = new Menu(this);
+            this.MENU_INITIALITED = true;
+        }
+        
 
         this.updateScore(0, time)
         this.ship.update(this.player_keys, time, delta);
