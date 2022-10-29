@@ -9,11 +9,13 @@ export default class Ship extends Phaser.GameObjects.Sprite {
         config.scene.add.existing(this);
         this.config = config;
         this.type = 'ship';
+        this.name = 'playerShip';
 
         this.setScale(0.5);
         //this.body.maxVelocity.x = 600;
         //this.body.maxVelocity.y = 600;
         this.body.setMaxVelocity(600);
+        //this.body.setMaxSpeed(600);
         this.body.setDrag(200, 200);
         //his.body.useDamping = true
         this.body.allowDrag = true

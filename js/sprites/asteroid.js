@@ -7,9 +7,7 @@ export default class Asteroid extends Phaser.GameObjects.Sprite {
         this.play(config.key)
 
         this.config = config;
-
         this.type = config.type;
-
 
         if (this.type == 'BIG') {
             this.setScale(Phaser.Math.FloatBetween(1.2, 0.8));
@@ -57,19 +55,27 @@ export default class Asteroid extends Phaser.GameObjects.Sprite {
     }
 
     createChild() {
-        let type = 'BIG';
-        if (this.type == 'BIG') { type = 'MEDIUM' }
-        if (this.type == 'MEDIUM') { type = 'SMALL' }
-        if (this.type == 'SMALL') { type = 'DUST' }
+        let childType = 'BIG';
+        if (this.type == 'BIG') { childType = 'MEDIUM' }
+        if (this.type == 'MEDIUM') { childType = 'SMALL' }
+        if (this.type == 'SMALL') { childType = 'DUST' }
 
-        var asteroid = new Asteroid({ scene: this.config.scene, key: this.config.key, x: this.x, y: this.y, type: type });
-
-        if (asteroid.type == 'DUST') {
-            asteroid.destroy();
+        if (childType != 'DUST'){
+            var asteroid = new Asteroid({ scene: this.config.scene, key: this.config.key, x: this.x, y: this.y, type: childType });
         }
+        
+        this._createSmokeFX();
+        this._createFlameFX();
+       
+        if (this.type == 'BIG') {
+            this._createBlastFX();
+        }    
+    }
+
+    _createSmokeFX(){
         let emitterSmoke = this.config.scene.add.particles('smoke').createEmitter({
-            x: asteroid.x,
-            y: asteroid.y,
+            x: this.x,
+            y: this.y,
             speed: { min: 1, max: 10 },
             angle: { min: 0, max: 270 },
             scale: { start: 0.5, end: 0 },
@@ -78,9 +84,12 @@ export default class Asteroid extends Phaser.GameObjects.Sprite {
             active: true,
             lifespan: 600, //milliseconds
         });
+        emitterSmoke.explode();
+    }
+    _createFlameFX(){
         let emitterFlame = this.config.scene.add.particles('flame').createEmitter({
-            x: asteroid.x,
-            y: asteroid.y,
+            x: this.x,
+            y: this.y,
             speed: { min: 1, max: 10 },
             angle: { min: 0, max: 270 },
             scale: { start: 0.5, end: 1 },
@@ -88,29 +97,27 @@ export default class Asteroid extends Phaser.GameObjects.Sprite {
             blendMode: 'SCREEN',
             active: true,
             lifespan: 600, //milliseconds
-        });        
-        emitterSmoke.explode();
+        }); 
         emitterFlame.explode();
         this.config.scene.sounds['explosion_short'].play();
+    }    
+    _createBlastFX(){
+        let emitterBlast = this.config.scene.add.particles('blastwave').createEmitter({
+            x: this.x,
+            y: this.y,
+            speed: { min: 0, max: 0 },
+            angle: { min: 0, max: 270 },
+            scale: { start: 0.1, end: 0.8 },
+            alpha: { start: 0.5, end: 0 },
+            blendMode: 'SCREEN',
+            active: true,
+            lifespan: 600, //milliseconds
+        });
+        emitterBlast.explode();
 
-        if (this.type == 'BIG') {
-            let emitterBlast = this.config.scene.add.particles('blastwave').createEmitter({
-                x: asteroid.x,
-                y: asteroid.y,
-                speed: { min: 0, max: 0 },
-                angle: { min: 0, max: 270 },
-                scale: { start: 0.1, end: 0.8 },
-                alpha: { start: 0.5, end: 0 },
-                blendMode: 'SCREEN',
-                active: true,
-                lifespan: 600, //milliseconds
-            });
-            emitterBlast.explode();
-
-            this.config.scene.sounds['sbabaam'].play();
-            this.config.scene.sounds['asteroid_explosion_1'].play();
-        }    
-    }
+        this.config.scene.sounds['sbabaam'].play();
+        this.config.scene.sounds['asteroid_explosion_1'].play();
+    }      
 
     toString() {
         let str = 'Asteroid(';

@@ -168,7 +168,6 @@ class GameScene extends Phaser.Scene {
         });*/
 
         console.log('asteroidsGroup: '+this.asteroidsGroup);
-        
 
         for (var i = 0; i < this.MAX_ASTEROIDS; i++){
             let asteroidKey = 'asteroid'+Phaser.Math.RND.integerInRange(1, 4)+'-anim';
@@ -176,14 +175,13 @@ class GameScene extends Phaser.Scene {
             let asteroidY = Phaser.Math.RND.integerInRange(0, this.WORLD_HEIGHT);
             var asteroid = new Asteroid( {scene:this, x:asteroidX, y:asteroidY, key: asteroidKey, type:'BIG'} );        
         }
-        console.log('asteroids: '+this.asteroidsArray.length)    
-
+        
         this.physics.add.collider(this.ship, this.asteroidsGroup, this.collideShipAsteroid);
         //this.physics.add.collider(this.asteroidsGroup,this.asteroidsGroup, this.collideAsteroid);
         this.physics.add.collider(this.bullets,this.asteroidsGroup, this.collideBulletAsteroid);
-    } 
 
-    createAsteroid(x, y, key){}
+        console.log('asteroids: '+this.asteroidsArray.length)
+    } 
 
     createSounds(){
         this.sounds = {}

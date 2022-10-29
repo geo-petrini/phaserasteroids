@@ -43,3 +43,24 @@ Sounds
 - add sounds for everything (ship, blaster, explosions)
 - add music
 - add music/sound control (mute/volume level)
+
+UI
+- options
+- in-game gui (eg: radar)
+- debugger console
+
+links
+https://phaserplugins.com/
+https://jsfehler.github.io/phaser-ui-tools/
+https://github.com/Flaxis/slick-ui
+https://github.com/samme/phaser-plugin-game-scale
+https://github.com/samme/phaser-sprite-gui  (v2) -> https://github.com/SilverTree7622/Phaser3_GUI_Inspector (v3)
+https://github.com/koreezgames/phaser3-particle-editor
+https://github.com/ivopc/phaser3-illuminated
+https://github.com/GaryStanton/phaser3-merged-input
+https://github.com/samme/phaser-component-health
+
+https://github.com/JHAvrick/phaser3-transitions
+https://github.com/netgfx/Phaser-tooltip
+
+https://codepen.io/samme/pen/dydxxYv    https://cdn.jsdelivr.net/npm/phaser-plugin-debug-draw@7.0.0/dist/phaser-plugin-debug-draw.umd.js
