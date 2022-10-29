@@ -19,14 +19,16 @@ class GameScene extends Phaser.Scene {
     	
 
     create() {
-        console.log('create');
+        console.log('gamescene create');
         let { game_width, game_height } = this.sys.game.canvas;
         this.game_width = game_width;
         this.game_height = game_height;
         //  World size is 8000 x 6000
         this.WORLD_WIDTH = 8000;
         this.WORLD_HEIGHT = 8000;
-        this.MAX_ASTEROIDS = this.WORLD_WIDTH*0.1;
+        //this.MAX_ASTEROIDS = this.WORLD_WIDTH*0.1;
+        this.MAX_ASTEROIDS = 80;
+        this.ASTEROIDS_INITIALITED = false;
 
         this.createBackground();
         this.text = this.add.text(32, 32, { color: '#fff' });
@@ -48,13 +50,14 @@ class GameScene extends Phaser.Scene {
             fire: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE),
         };
         this.createShip();
-        this.createAsteroids();
+        //this.createAsteroids(); moved in update
     
-        this.physics.add.collider(this.ship, this.asteroidsGroup, this.collideShip)
-        //this.physics.add.collider(this.asteroidsGroup,this.asteroidsGroup, this.collideAsteroid)        
-        this.physics.add.collider(this.bullets,this.asteroidsGroup, this.collideBullet)        
+
 
         this.createSounds();
+
+        //PhaserGUIAction(this);  //takes a very long time to load, too many asteroids?
+        console.log('gamescene ready');
     }
 
     createBackground() {
@@ -168,13 +171,19 @@ class GameScene extends Phaser.Scene {
         
 
         for (var i = 0; i < this.MAX_ASTEROIDS; i++){
-            let asteroidType = 'asteroid'+Phaser.Math.RND.integerInRange(1, 4)+'-anim';
+            let asteroidKey = 'asteroid'+Phaser.Math.RND.integerInRange(1, 4)+'-anim';
             let asteroidX = Phaser.Math.RND.integerInRange(0, this.WORLD_WIDTH);
             let asteroidY = Phaser.Math.RND.integerInRange(0, this.WORLD_HEIGHT);
-            var asteroid = new Asteroid( {scene:this, key: asteroidType, x:asteroidX, y:asteroidY, type:'BIG'} );        
+            var asteroid = new Asteroid( {scene:this, x:asteroidX, y:asteroidY, key: asteroidKey, type:'BIG'} );        
         }
         console.log('asteroids: '+this.asteroidsArray.length)    
+
+        this.physics.add.collider(this.ship, this.asteroidsGroup, this.collideShipAsteroid);
+        //this.physics.add.collider(this.asteroidsGroup,this.asteroidsGroup, this.collideAsteroid);
+        this.physics.add.collider(this.bullets,this.asteroidsGroup, this.collideBulletAsteroid);
     } 
+
+    createAsteroid(x, y, key){}
 
     createSounds(){
         this.sounds = {}
@@ -185,7 +194,7 @@ class GameScene extends Phaser.Scene {
         this.sounds['asteroid_explosion_1'] = this.sound.add('asteroid_explosion_1');
     }
 
-    collideShip(ship, asteroid){
+    collideShipAsteroid(ship, asteroid){
         console.log('BOOM'); 
 
         asteroid.createChild();
@@ -194,7 +203,7 @@ class GameScene extends Phaser.Scene {
         ship.config.scene.cameras.main.shake(400, 0.005);
     }
 
-    collideBullet(bullet, asteroid){
+    collideBulletAsteroid(bullet, asteroid){
         console.log('BLAM '+asteroid);
         
         bullet.destroy();
@@ -242,7 +251,10 @@ class GameScene extends Phaser.Scene {
 	    //this.physics.collide(this.ship, this.asteroidsGroup);
 	    //this.physics.collide(this.asteroidsGroup, this.asteroidsGroup);
 	    //this.physics.collide(this.bullets, this.asteroidsGroup);
-             
+        if (this.ASTEROIDS_INITIALITED == false){
+            this.createAsteroids()
+            this.ASTEROIDS_INITIALITED = true;
+        }
 
         this.updateScore(0, time)
         this.ship.update(this.player_keys, time, delta);
