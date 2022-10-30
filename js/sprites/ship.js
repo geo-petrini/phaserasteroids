@@ -1,7 +1,7 @@
 export default class Ship extends Phaser.GameObjects.Sprite {
     
     lastFired = null;
-    fireIntervall = 350;
+    
     
     constructor(config) {
         super(config.scene, config.x, config.y, config.texture, config.key);
@@ -11,16 +11,22 @@ export default class Ship extends Phaser.GameObjects.Sprite {
         this.type = 'ship';
         this.name = 'playerShip';
 
+        this.ROTATION = 100
+        this.ACCELERATION = 40
+        this.FIREINTERVALL = 25;
+
         this.setScale(0.5);
         //this.body.maxVelocity.x = 600;
         //this.body.maxVelocity.y = 600;
         this.body.setMaxVelocity(600);
-        //this.body.setMaxSpeed(600);
-        this.body.setDrag(200, 200);
-        //his.body.useDamping = true
-        this.body.allowDrag = true
+        this.body.setMaxSpeed(600);
+        //this.body.setDrag(200, 200);
+        this.body.setDrag(0.5);
+        this.body.allowDrag = true;
+        this.body.useDamping = true;    //https://newdocs.phaser.io/docs/3.55.2/focus/Phaser.Physics.Arcade.Body-useDamping
         this.body.angularDrag = 150;
-        this.body.acceleration = 50;
+        this.body.acceleration = this.ACCELERATION;
+        this.setDepth(1);
         //this.setDrag(200);
         //this.setAngularDrag(150);
         //ship.setMaxVelocity(700);	//wrong axes https://phaser.discourse.group/t/arcade-physics-incorrect-velocity-vector-when-trying-to-fly-forward/4126        
@@ -39,9 +45,9 @@ export default class Ship extends Phaser.GameObjects.Sprite {
         }else{
             //console.log('ship: (' + this.x + ';' + this.y + ')')
             if (keys.left.isDown || keys.alt_left.isDown) {
-                this.body.setAngularVelocity( -150);
+                this.body.setAngularVelocity( this.ROTATION*-1);
             } else if (keys.right.isDown || keys.alt_right.isDown) {
-                this.body.setAngularVelocity(150);
+                this.body.setAngularVelocity(this.ROTATION);
             } else {
                 //this.setAngularVelocity(0)
                 //this.body.angularVelocity = 0;;
@@ -77,7 +83,8 @@ export default class Ship extends Phaser.GameObjects.Sprite {
                 if (bullet)
                 {
                     bullet.fire(this);
-                    this.lastFired = time + this.fireIntervall;
+                    bullet.setDepth( this.depth -1 );
+                    this.lastFired = time + this.FIREINTERVALL;
                     this.config.scene.sounds['laser'].play();
                 }
             }

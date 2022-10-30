@@ -31,8 +31,8 @@ class GameScene extends Phaser.Scene {
         //  World size is 8000 x 6000
         this.WORLD_WIDTH = 8000;
         this.WORLD_HEIGHT = 8000;
-        //this.MAX_ASTEROIDS = this.WORLD_WIDTH*0.1;
-        this.MAX_ASTEROIDS = 80;
+        this.MAX_ASTEROIDS = this.WORLD_WIDTH*0.1;
+        //this.MAX_ASTEROIDS = 80;
         this.ASTEROIDS_INITIALIZED = false;
         this.MENU_INITIALIZED = false;
 
@@ -65,7 +65,8 @@ class GameScene extends Phaser.Scene {
     
         //this.MKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.M);
         this.MenuKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
-
+        this.physics.world.drawDebug = false;
+        this.toggleDebug = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P);
         this.createSounds();
 
         //PhaserGUIAction(this);  //takes a very long time to load, too many asteroids?
@@ -247,18 +248,20 @@ class GameScene extends Phaser.Scene {
     updateScore(score, time) {
         //this.text.setPosition(ship.x, ship.y - 30);
         var outstr = "";
-
+        
+        if (this.cameras.cameras !==undefined) {
+            this.text.setPosition(this.cameras.main.scrollX+50, this.cameras.main.scrollY+50);
+            outstr += '\n'+'Camera('+ 'sx: '+this.cameras.main.scrollX.toFixed(2) +','+ 'sy: '+this.cameras.main.scrollY.toFixed(2)+')';
+        }
         //if (this.ship != null && this.scene.cameras !==undefined) {
         if (this.ship != null ) {
             //let textX = this.scene.cameras.main.centerX - this.scene.cameras.main.width/2;
             //let textY = this.scene.cameras.main.centerY - this.scene.cameras.main.height/2;
             //this.text.setPosition(textX, textY);
-            this.text.setPosition(this.ship.x+50, this.ship.y+50);
-            outstr += 'Ship(x:' + this.ship.x.toFixed(2) + ', y:' + this.ship.y.toFixed(2) + ')';
+            //this.text.setPosition(this.ship.x+50, this.ship.y+50);
+            outstr += '\n'+'Ship(x:' + this.ship.x.toFixed(2) + ', y:' + this.ship.y.toFixed(2) + ')';
         }
-        if (this.cameras.cameras !==undefined) {
-            outstr += '\n'+'Camera('+ 'sx: '+this.cameras.main.scrollX.toFixed(2) +','+ 'sy: '+this.cameras.main.scrollY.toFixed(2)+')';
-        }
+
 
         outstr += '\n'+'asteroids count: '+this.asteroidsGroup.getLength();
         outstr += '\n'+'time: '+time;
@@ -267,6 +270,16 @@ class GameScene extends Phaser.Scene {
     }
 
     update(time, delta) {
+        if (Phaser.Input.Keyboard.JustDown(this.toggleDebug)) {
+            if (this.physics.world.drawDebug) {
+              this.physics.world.drawDebug = false;
+              this.physics.world.debugGraphic.clear();
+            }
+            else {
+              this.physics.world.drawDebug = true;
+            }
+        }
+
 	    //this.physics.collide(this.ship, this.asteroidsGroup);
 	    //this.physics.collide(this.asteroidsGroup, this.asteroidsGroup);
 	    //this.physics.collide(this.bullets, this.asteroidsGroup);
