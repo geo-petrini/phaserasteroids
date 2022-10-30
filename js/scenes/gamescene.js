@@ -64,7 +64,7 @@ class GameScene extends Phaser.Scene {
         //this.createAsteroids(); moved in update
     
         //this.MKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.M);
-        this.MKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
+        this.MenuKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
 
         this.createSounds();
 
@@ -280,7 +280,7 @@ class GameScene extends Phaser.Scene {
         //https://labs.phaser.io/edit.html?src=src/input/keyboard/key%20down%20duration.js&v=3.55.2
         //https://labs.phaser.io/edit.html?src=src/input/keyboard/key%20down%20delay.js&v=3.55.2
 
-        if (this.input.keyboard.checkDown( this.MKey, 250 ))
+        if (this.input.keyboard.checkDown( this.MenuKey, 250 ))
         {
             if (this.MENU_INITIALIZED == false){
                 this.menu = new Menu(this);
