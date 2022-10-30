@@ -64,7 +64,7 @@ class GameScene extends Phaser.Scene {
         //this.createAsteroids(); moved in update
     
         //this.MKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.M);
-        this.MKey = this.input.keyboard.addKey('M');
+        this.MKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
 
         this.createSounds();
 
@@ -287,7 +287,7 @@ class GameScene extends Phaser.Scene {
                 this.MENU_INITIALIZED = true;
             }
 
-            if (this.menu.isVisible()){
+            if (this.menu.isOpen()){
                 this.menu.close();
             }else{
                 this.menu.open();

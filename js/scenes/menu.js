@@ -157,9 +157,9 @@ class Menu{
         return menuCenterY        
     }
 
-    isVisible(){
+    isOpen(){
         console.log('dialog visible: '+ this.toString());
-        if (this.dialog.scaleX == 0){
+        if (this.dialog.scaleX == 0 || this.dialog.scaleY == 0 ){
             return false;
         }else{
             return true;
@@ -169,7 +169,7 @@ class Menu{
 
     open(){
         console.log('dialog visible: '+ 'opening');
-        this.dialog.show();
+        //this.dialog.show();
         //this.dialog.layout();
         this.dialog.scaleX = 1;
         this.dialog.scaleY = 1;
@@ -182,6 +182,8 @@ class Menu{
         console.log('dialog visible: '+ 'closing');
         //this.dialog = undefined;
         this.dialog.scaleDown(100);
+        this.dialog.scaleX = 0;
+        this.dialog.scaleY = 0;        
         //this.dialog.hide();
         //this.dialog.layout();
         //this.scene.hide(this.dialog);
