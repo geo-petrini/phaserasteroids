@@ -27,4 +27,8 @@ const config = {
     ]
 };
 
+window.addEventListener('resize', () => {
+    game.scale.resize(window.innerWidth, window.innerHeight);
+});
+
 const game = new Phaser.Game(config); // eslint-disable-line no-unused-vars
