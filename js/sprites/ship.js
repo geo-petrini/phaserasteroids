@@ -13,7 +13,7 @@ export default class Ship extends Phaser.GameObjects.Sprite {
 
         this.ROTATION = 100
         this.ACCELERATION = 40
-        this.FIREINTERVALL = 25;
+        this.FIREINTERVALL = 5;
 
         this.setScale(0.5);
         //this.body.maxVelocity.x = 600;

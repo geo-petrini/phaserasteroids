@@ -3,6 +3,8 @@ import Bullet from '../sprites/bullet.js'
 import Asteroid from '../sprites/asteroid.js';
 
 import Menu from './menu.js';
+import MiniMap from './minimap.js';
+import Radar from './radar.js';
 
 
 class GameScene extends Phaser.Scene {
@@ -31,8 +33,9 @@ class GameScene extends Phaser.Scene {
         //  World size is 8000 x 6000
         this.WORLD_WIDTH = 8000;
         this.WORLD_HEIGHT = 8000;
-        this.MAX_ASTEROIDS = this.WORLD_WIDTH*0.1;
+        //this.MAX_ASTEROIDS = this.WORLD_WIDTH*0.1;
         //this.MAX_ASTEROIDS = 80;
+        this.MAX_ASTEROIDS = 800;
         this.ASTEROIDS_INITIALIZED = false;
         this.MENU_INITIALIZED = false;
 
@@ -69,6 +72,21 @@ class GameScene extends Phaser.Scene {
         this.toggleDebug = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P);
         this.createSounds();
 
+        //this.createMinimap();
+        /*let minimapMargin = 10
+        let minimapWidth = 400
+        let minimapHeight = 200        
+        this.minimap = new MiniMap( {
+            scene:this, 
+            zoom: 0.05
+            //x:this.game_width - minimapWidth - minimapMargin , 
+            //y:this.game_height - minimapHeight - minimapMargin,
+            //width: minimapWidth,
+            //height: minimapHeight
+        } ).init()*/
+
+        this.radar = new Radar(this);
+
         //PhaserGUIAction(this);  //takes a very long time to load, too many asteroids?
         console.log('gamescene ready');
     }
@@ -100,6 +118,18 @@ class GameScene extends Phaser.Scene {
             ease: 'Linear',
             loop: -1
         });
+    }
+
+    createMinimap(){
+        let margin = 10
+        let minimapWidth = 400
+        let minimapHeight = 200
+        let minimapX = this.game_width - minimapWidth - margin;
+        let minimapY = this.game_height - minimapHeight - margin
+        this.minimap = this.cameras.add(minimapX, minimapY, minimapWidth, minimapHeight).setZoom(0.2).setName('mini');
+        this.minimap.setBackgroundColor(0x002244);
+        //this.minimap.scrollX = 1600;
+        //this.minimap.scrollY = 300;        
     }
 
     createShip(){
@@ -191,7 +221,7 @@ class GameScene extends Phaser.Scene {
         
         this.physics.add.collider(this.ship, this.asteroidsGroup, this.collideShipAsteroid);
         //this.physics.add.collider(this.asteroidsGroup,this.asteroidsGroup, this.collideAsteroid);
-        this.physics.add.collider(this.bullets,this.asteroidsGroup, this.collideBulletAsteroid);
+        this.physics.add.collider(this.bullets, this.asteroidsGroup, this.collideBulletAsteroid);
 
         console.log('asteroids: '+this.asteroidsArray.length)
     } 
@@ -223,6 +253,11 @@ class GameScene extends Phaser.Scene {
         asteroid.createChild();
         asteroid.createChild();
 
+        let arr = asteroid.scene.asteroidsArray;
+        let asteroidIndex = arr.indexOf(asteroid);
+        if (asteroidIndex > -1){
+            arr.splice(asteroidIndex, 1);
+        }
         asteroid.destroy();
 
     }
@@ -253,6 +288,10 @@ class GameScene extends Phaser.Scene {
             this.text.setPosition(this.cameras.main.scrollX+50, this.cameras.main.scrollY+50);
             outstr += '\n'+'Camera('+ 'sx: '+this.cameras.main.scrollX.toFixed(2) +','+ 'sy: '+this.cameras.main.scrollY.toFixed(2)+')';
         }
+
+        if (this.minimap !==undefined) {
+            outstr += '\n'+'Minimap('+ 'sx: '+this.minimap.scrollX.toFixed(2) +','+ 'sy: '+this.minimap.scrollY.toFixed(2)+')';
+        }        
         //if (this.ship != null && this.scene.cameras !==undefined) {
         if (this.ship != null ) {
             //let textX = this.scene.cameras.main.centerX - this.scene.cameras.main.width/2;
@@ -326,6 +365,9 @@ class GameScene extends Phaser.Scene {
         this.stars.tilePositionX += this.ship.body.deltaX() * 2;
         this.stars.tilePositionY += this.ship.body.deltaY() * 2;
 
+        this.radar.update();
+        //this.minimap.scrollX = Phaser.Math.Clamp(this.ship.x + 200, 0, this.WORLD_WIDTH);
+        //this.minimap.scrollY = Phaser.Math.Clamp(this.ship.y + 200, 0, this.WORLD_WIDTH);
     }
 }
 export default GameScene;
