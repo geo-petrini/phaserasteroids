@@ -16,7 +16,7 @@ const config = {
     width: SET_WIDTH,
     height: SET_HEIGHT,
     physics: {
-        default: 'arcade',  
+        default: 'arcade',
         arcade: {
             debug: true
         }
