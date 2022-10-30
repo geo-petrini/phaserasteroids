@@ -72,22 +72,9 @@ class GameScene extends Phaser.Scene {
         this.toggleDebug = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P);
         this.createSounds();
 
-        //this.createMinimap();
-        /*let minimapMargin = 10
-        let minimapWidth = 400
-        let minimapHeight = 200        
-        this.minimap = new MiniMap( {
-            scene:this, 
-            zoom: 0.05
-            //x:this.game_width - minimapWidth - minimapMargin , 
-            //y:this.game_height - minimapHeight - minimapMargin,
-            //width: minimapWidth,
-            //height: minimapHeight
-        } ).init()*/
-
         this.radar = new Radar(this);
 
-        //PhaserGUIAction(this);  //takes a very long time to load, too many asteroids?
+        //PhaserGUIAction(this);  //takes a very long time to load when asteroids are created here, moved to update
         console.log('gamescene ready');
     }
 
