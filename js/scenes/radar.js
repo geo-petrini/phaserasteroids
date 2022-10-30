@@ -1,44 +1,69 @@
 export default class Radar {
     constructor (scene){
         this.scene = scene
-        this.scene.radarGraphics = this.scene.add.graphics({ lineStyle: { width: 2, color: 0x0000aa } });
+        this.scene.radarGraphics = this.scene.add.graphics();
         this.g = this.scene.radarGraphics;
-        this.lines = []
         this.DEBUGLINES = false
-        this.DOT_RADIUS = 2
-        this.DOT_LINE_SIZE = 2
-        this.DOT_LINE_COLOR = Phaser.Display.Color.GetColor32(200, 200, 210, 128);
-
-        this.DBG_LINE_COLOR = Phaser.Display.Color.GetColor32(0, 0, 210, 128);
+        this.DOT_SIZE = 5 //maximum size
+        this.DOT_LINE_SIZE = 1
+        this.DOT_LINE_COLOR = Phaser.Display.Color.GetColor(200, 200, 200);
+        this.DOT_FILL_COLOR = Phaser.Display.Color.GetColor(100, 100, 100);
+        this.DBG_LINE_COLOR = Phaser.Display.Color.GetColor(0, 0, 210);
     }
   
     update() {
-        this.lines = []
         this.g.clear();
-        //this.scene.asteroidsArray.forEach( this.drawLine, this );
+        if (this.DEBUGLINES){
+            this.scene.asteroidsArray.forEach( this.drawLine, this );
+        }
         this.drawRect()
         this.scene.asteroidsArray.forEach( this.drawIntersection, this );
-
+        this.g.setAlpha(0.5);
     }
 
     drawIntersection(asteroid){
         this.g.lineStyle(this.DOT_LINE_SIZE, this.DOT_LINE_COLOR);
+        this.g.fillStyle(this.DOT_FILL_COLOR);
 
         try{
-            let point = this.pointOnRect(asteroid.x, asteroid.y, this.rect.x, this.rect.y, this.rect.x+this.rect.width, this.rect.y+this.rect.height, true)
-            let circle = new Phaser.Geom.Circle(point.x, point.y, this.DOT_RADIUS);
-            this.g.strokeCircleShape(circle)
+            const pointCoords = this.pointOnRect(
+                asteroid.x, 
+                asteroid.y, 
+                this.rect.x, 
+                this.rect.y, 
+                this.rect.x+this.rect.width, 
+                this.rect.y+this.rect.height, 
+                true
+                );
+
+            const distance = this.getAsteroidDistance(asteroid);
+            const vicinity = this.getAsteroidVicinity(distance);
+            const point_size = Math.max(this.DOT_SIZE * vicinity, 1);
+            this.g.fillPoint(pointCoords.x, pointCoords.y, point_size);
+            //const point = new Phaser.Geom.Point(pointCoords.x, pointCoords.y);
+            //this.g.fillPointShape(point, point_size);
         } catch (error){
-            //console.error(error)
+            console.error(error)
         }
     }
 
+    getAsteroidDistance(asteroid){
+        const l1 = this.scene.ship.x - asteroid.x;
+        const l2 = this.scene.ship.y - asteroid.y;
+        return Math.sqrt(l1*l1+l2*l2)
+    }
+
+    getAsteroidVicinity(distance){
+        const minDistance = Math.max(this.scene.cameras.main.width, this.scene.cameras.main.height)
+        return minDistance/distance
+    }
+
     drawRect(){
-        let margin = 10;
-        let rectX = this.scene.cameras.main.scrollX;
-        let rectY = this.scene.cameras.main.scrollY;
-        let rectWidth = this.scene.cameras.main.width;
-        let rectHeight = this.scene.cameras.main.height;
+        const margin = this.DOT_SIZE;
+        const rectX = this.scene.cameras.main.scrollX;
+        const rectY = this.scene.cameras.main.scrollY;
+        const rectWidth = this.scene.cameras.main.width;
+        const rectHeight = this.scene.cameras.main.height;
         this.rect = new Phaser.Geom.Rectangle(rectX + margin, rectY + margin, rectWidth- margin*2, rectHeight-margin*2);
         if (this.DEBUGLINES){
             this.g.lineStyle(2, 0x00bb00);
@@ -48,11 +73,8 @@ export default class Radar {
 
     drawLine(asteroid){
         var line = new Phaser.Geom.Line(this.scene.ship.x, this.scene.ship.y, asteroid.x, asteroid.y);
-        if (this.DEBUGLINES){
-            this.g.lineStyle(2, this.DBG_LINE_COLOR);
-            this.g.strokeLineShape(line)
-        }
-        this.lines.push(line);
+        this.g.lineStyle(2, this.DBG_LINE_COLOR);
+        this.g.strokeLineShape(line)
     }
 
     pointOnRect(x, y, minX, minY, maxX, maxY, validate) {

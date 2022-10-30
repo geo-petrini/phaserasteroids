@@ -309,6 +309,7 @@ class GameScene extends Phaser.Scene {
     }
 
     update(time, delta) {
+        //this.sys.game.debug.text(this.sys.game.time.fps, 5, 14, '#00ff00');
         if (Phaser.Input.Keyboard.JustDown(this.toggleDebug)) {
             if (this.physics.world.drawDebug) {
               this.physics.world.drawDebug = false;
@@ -354,6 +355,8 @@ class GameScene extends Phaser.Scene {
             asteroid.update();
         });
 
+        this.radar.update();
+
         //this.physics.arcade.collide(ship, asteroids);
         //this.physics.arcade.collide(asteroids, asteroids);
         //this.physics.arcade.collide(asteroids, bullets, hitAsteroid);
@@ -365,7 +368,7 @@ class GameScene extends Phaser.Scene {
         this.stars.tilePositionX += this.ship.body.deltaX() * 2;
         this.stars.tilePositionY += this.ship.body.deltaY() * 2;
 
-        this.radar.update();
+        
         //this.minimap.scrollX = Phaser.Math.Clamp(this.ship.x + 200, 0, this.WORLD_WIDTH);
         //this.minimap.scrollY = Phaser.Math.Clamp(this.ship.y + 200, 0, this.WORLD_WIDTH);
     }
