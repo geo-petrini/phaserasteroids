@@ -38,16 +38,16 @@ export default class Ship extends Phaser.GameObjects.Sprite {
             
         }else{
             //console.log('ship: (' + this.x + ';' + this.y + ')')
-            if (keys.left.isDown) {
+            if (keys.left.isDown || keys.alt_left.isDown) {
                 this.body.setAngularVelocity( -150);
-            } else if (keys.right.isDown) {
+            } else if (keys.right.isDown || keys.alt_right.isDown) {
                 this.body.setAngularVelocity(150);
             } else {
                 //this.setAngularVelocity(0)
                 //this.body.angularVelocity = 0;;
             }
 
-            if (keys.up.isDown) {
+            if (keys.up.isDown || keys.alt_up.isDown) {
                 //this.physics.velocityFromRotation(this.rotation, 600, this.body.acceleration);
                 const vector = this.scene.physics.velocityFromRotation(this.rotation, 1);//, this.body.velocity);
                 const vel = this.body.velocity

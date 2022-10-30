@@ -1,18 +1,30 @@
 class Menu{
     constructor(scene){
-        this.scene = scene
-        this.createMenu();
+        console.log('menu constructor begin');
+        this.scene = scene;
+        this.menuWidth = 500
+        this.dialog = undefined;
+        this.createDialog();
+        this.close();
+        console.log('dialog: '+ this.toString());
+        console.log('menu constructor end');
     }
 
-    createMenu(){
+    createDialog(){
         //https://rexrainbow.github.io/phaser3-rex-notes/docs/site/ui-dialog/
         //https://rexrainbow.github.io/phaser3-rex-notes/docs/site/ui-overview/#demos
         //https://codepen.io/rexrainbow/pen/oQjMWE
-        
+
+        //https://codepen.io/rexrainbow/pen/NEpjmP
+
+        /*
+        center menu in the camera view
+        */
+
         this.dialog = this.scene.rexUI.add.dialog({
-            x: 400,
-            y: 300,
-            width: 500,
+            x: this.calcXPosition(),
+            y: this.calcYPosition(),
+            width: this.menuWidth,
     
             background: this.scene.rexUI.add.roundRectangle(0, 0, 100, 100, 20, 0x1565c0),
     
@@ -88,7 +100,7 @@ class Menu{
         this.dialog.setDraggable('background')   // Draggable-background
         this.dialog.layout()
         // this.dialog.drawBounds(this.add.graphics(), 0xff0000)
-        this.dialog.popUp(1000);
+        //this.dialog.popUp(1000);
     
         /*
         var tween = this.tweens.add({
@@ -104,7 +116,7 @@ class Menu{
     
         this.scene.print = this.scene.add.text(0, 0, '');
         this.dialog.on('button.click', function (button, groupName, index, pointer, event) {
-            this.print.text += groupName + '-' + index + ': ' + button.text + '\n';
+            this.scene.print.text += groupName + '-' + index + ': ' + button.text + '\n';
         }, this)
         this.dialog.on('button.over', function (button, groupName, index, pointer, event) {
             button.getElement('background').setStrokeStyle(1, 0xffffff);
@@ -133,6 +145,54 @@ class Menu{
                 bottom: 10
             }
         });
+    }
+
+    calcXPosition(){
+        let menuCenterX = this.scene.cameras.main.scrollX + 10 + this.menuWidth/2;  
+        return menuCenterX;
+    }
+
+    calcYPosition(){
+        let menuCenterY = this.scene.cameras.main.scrollY + this.scene.cameras.main.height/2;
+        return menuCenterY        
+    }
+
+    isVisible(){
+        console.log('dialog visible: '+ this.toString());
+        if (this.dialog.scaleX == 0){
+            return false;
+        }else{
+            return true;
+        }
+        //return this.dialog.visible;
+    }
+
+    open(){
+        console.log('dialog visible: '+ 'opening');
+        this.dialog.show();
+        //this.dialog.layout();
+        this.dialog.scaleX = 1;
+        this.dialog.scaleY = 1;
+        this.dialog.x = this.calcXPosition();
+        this.dialog.y = this.calcYPosition();
+        this.dialog.popUp(100);
+    }
+
+    close(){
+        console.log('dialog visible: '+ 'closing');
+        //this.dialog = undefined;
+        this.dialog.scaleDown(100);
+        //this.dialog.hide();
+        //this.dialog.layout();
+        //this.scene.hide(this.dialog);
+        //this.dialog.scaleDownDestroy(100);
+        //this = undefined;
+    }
+
+    toString(){
+        let str = '';
+        str += '(dialog: x:'+this.dialog.x + ', y: '+this.dialog.y + ', visible: ' + this.dialog.visible + ', scalex:'+this.dialog.scaleX + ', scaley: '+this.dialog.scaleY +')';
+        return str;
     }
 }
 

@@ -33,8 +33,8 @@ class GameScene extends Phaser.Scene {
         this.WORLD_HEIGHT = 8000;
         //this.MAX_ASTEROIDS = this.WORLD_WIDTH*0.1;
         this.MAX_ASTEROIDS = 80;
-        this.ASTEROIDS_INITIALITED = false;
-        this.MENU_INITIALITED = false;
+        this.ASTEROIDS_INITIALIZED = false;
+        this.MENU_INITIALIZED = false;
 
         this.createBackground();
         this.text = this.add.text(32, 32, { color: '#fff' });
@@ -53,12 +53,18 @@ class GameScene extends Phaser.Scene {
             left: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT),
             right: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT),
             down: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN),
+
+            alt_up: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W),
+            alt_left: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A),
+            alt_right: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D),
+            alt_down: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S),            
             fire: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE),
         };
         this.createShip();
         //this.createAsteroids(); moved in update
     
-
+        //this.MKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.M);
+        this.MKey = this.input.keyboard.addKey('M');
 
         this.createSounds();
 
@@ -198,8 +204,6 @@ class GameScene extends Phaser.Scene {
         this.sounds['asteroid_explosion_1'] = this.sound.add('asteroid_explosion_1');
     }
 
-    
-
     collideShipAsteroid(ship, asteroid){
         console.log('BOOM'); 
 
@@ -244,10 +248,18 @@ class GameScene extends Phaser.Scene {
         //this.text.setPosition(ship.x, ship.y - 30);
         var outstr = "";
 
-        if (this.ship != null) {
-            this.text.setPosition(this.ship.x-400, this.ship.y - 400);
+        //if (this.ship != null && this.scene.cameras !==undefined) {
+        if (this.ship != null ) {
+            //let textX = this.scene.cameras.main.centerX - this.scene.cameras.main.width/2;
+            //let textY = this.scene.cameras.main.centerY - this.scene.cameras.main.height/2;
+            //this.text.setPosition(textX, textY);
+            this.text.setPosition(this.ship.x+50, this.ship.y+50);
             outstr += 'Ship(x:' + this.ship.x.toFixed(2) + ', y:' + this.ship.y.toFixed(2) + ')';
         }
+        if (this.cameras.cameras !==undefined) {
+            outstr += '\n'+'Camera('+ 'sx: '+this.cameras.main.scrollX.toFixed(2) +','+ 'sy: '+this.cameras.main.scrollY.toFixed(2)+')';
+        }
+
         outstr += '\n'+'asteroids count: '+this.asteroidsGroup.getLength();
         outstr += '\n'+'time: '+time;
         this.text.setText(outstr);
@@ -258,14 +270,29 @@ class GameScene extends Phaser.Scene {
 	    //this.physics.collide(this.ship, this.asteroidsGroup);
 	    //this.physics.collide(this.asteroidsGroup, this.asteroidsGroup);
 	    //this.physics.collide(this.bullets, this.asteroidsGroup);
-        if (this.ASTEROIDS_INITIALITED == false){
+        if (this.ASTEROIDS_INITIALIZED == false){
             this.createAsteroids()
-            this.ASTEROIDS_INITIALITED = true;
+            this.ASTEROIDS_INITIALIZED = true;
         }
-        if (this.MENU_INITIALITED == false){
-            //this.menu = new Menu(this);
-            this.MENU_INITIALITED = true;
-        }
+
+
+        //if (this.MKey.isDown) //not working as there is no delay
+        //https://labs.phaser.io/edit.html?src=src/input/keyboard/key%20down%20duration.js&v=3.55.2
+        //https://labs.phaser.io/edit.html?src=src/input/keyboard/key%20down%20delay.js&v=3.55.2
+
+        if (this.input.keyboard.checkDown( this.MKey, 250 ))
+        {
+            if (this.MENU_INITIALIZED == false){
+                this.menu = new Menu(this);
+                this.MENU_INITIALIZED = true;
+            }
+
+            if (this.menu.isVisible()){
+                this.menu.close();
+            }else{
+                this.menu.open();
+            }
+        }        
         
 
         this.updateScore(0, time)
