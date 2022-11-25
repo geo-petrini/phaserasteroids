@@ -35,7 +35,7 @@ Gameplay
     - superweapon (seismic bomb/clear radius)
 
 Ship control
-- add alternative controls from keyboard keys, eg touch control with https://yoannmoi.net/nipplejs/
+- add alternative controls from keyboard keys, eg touch control with https://yoannmoi.net/nipplejs/, https://rexrainbow.github.io/phaser3-rex-notes/docs/site/virtualjoystick/
 
 Effects
 - size explosion by asteroid size
@@ -74,3 +74,5 @@ https://codepen.io/samme/pen/dydxxYv    https://cdn.jsdelivr.net/npm/phaser-plug
 fps meter: https://github.com/mrdoob/stats.js/
 
 https://stackoverflow.com/questions/61327843/phaser-3-with-nipplejs-and-cordova-not-working-in-ios
+
+https://gamedevacademy.org/how-to-debug-phaser-games/

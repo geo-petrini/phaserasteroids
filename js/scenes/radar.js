@@ -3,8 +3,10 @@ export default class Radar {
         this.scene = scene
         this.scene.radarGraphics = this.scene.add.graphics();
         this.g = this.scene.radarGraphics;
+        //this.g.setScrollFactor(0)
+        //this.g = new Phaser.GameObjects.Graphics(scene);
         this.DEBUGLINES = false
-        this.DOT_SIZE = 5 //maximum size
+        this.DOT_MAX_SIZE = 5 //maximum size
         this.DOT_LINE_SIZE = 1
         this.DOT_LINE_COLOR = Phaser.Display.Color.GetColor(200, 200, 200);
         this.DOT_FILL_COLOR = Phaser.Display.Color.GetColor(100, 100, 100);
@@ -13,10 +15,12 @@ export default class Radar {
   
     update() {
         this.g.clear();
+        this.drawRect();
+
         if (this.DEBUGLINES){
             this.scene.asteroidsArray.forEach( this.drawLine, this );
         }
-        this.drawRect()
+        
         this.scene.asteroidsArray.forEach( this.drawIntersection, this );
         this.g.setAlpha(0.5);
     }
@@ -31,16 +35,16 @@ export default class Radar {
                 asteroid.y, 
                 this.rect.x, 
                 this.rect.y, 
-                this.rect.x+this.rect.width, 
-                this.rect.y+this.rect.height, 
+                this.rect.x + this.rect.width, 
+                this.rect.y + this.rect.height, 
                 true
                 );
 
             const distance = this.getAsteroidDistance(asteroid);
             const vicinity = this.getAsteroidVicinity(distance);
-            const point_size = Math.max(this.DOT_SIZE * vicinity, 1);
+            const point_size = Math.max(this.DOT_MAX_SIZE * vicinity, 1);
             this.g.fillPoint(pointCoords.x, pointCoords.y, point_size);
-            //const point = new Phaser.Geom.Point(pointCoords.x, pointCoords.y);
+            //const point = new Phaser.Geom.Point(pointCoords.x, pointCoords.y, point_size);
             //this.g.fillPointShape(point, point_size);
         } catch (error){
             console.error(error)
@@ -55,16 +59,19 @@ export default class Radar {
 
     getAsteroidVicinity(distance){
         const minDistance = Math.max(this.scene.cameras.main.width, this.scene.cameras.main.height)
+        //const minDistance = Math.max(this.scene.game_width, this.scene.game_height)
         return minDistance/distance
     }
 
     drawRect(){
-        const margin = this.DOT_SIZE;
+        const margin = this.DOT_MAX_SIZE;
         const rectX = this.scene.cameras.main.scrollX;
         const rectY = this.scene.cameras.main.scrollY;
+        //const rectWidth = this.scene.game_width ;
+        //const rectHeight = this.scene.game_height 
         const rectWidth = this.scene.cameras.main.width;
         const rectHeight = this.scene.cameras.main.height;
-        this.rect = new Phaser.Geom.Rectangle(rectX + margin, rectY + margin, rectWidth- margin*2, rectHeight-margin*2);
+        this.rect = new Phaser.Geom.Rectangle(rectX + margin, rectY + margin, rectWidth-margin*2, rectHeight-margin*2);
         if (this.DEBUGLINES){
             this.g.lineStyle(2, 0x00bb00);
             this.g.strokeRectShape(this.rect);

@@ -30,7 +30,6 @@ class GameScene extends Phaser.Scene {
         let { game_width, game_height } = this.sys.game.canvas;
         this.game_width = game_width;
         this.game_height = game_height;
-        //  World size is 8000 x 6000
         this.WORLD_WIDTH = 8000;
         this.WORLD_HEIGHT = 8000;
         //this.MAX_ASTEROIDS = this.WORLD_WIDTH*0.1;
@@ -38,19 +37,13 @@ class GameScene extends Phaser.Scene {
         this.MAX_ASTEROIDS = 800;
         this.ASTEROIDS_INITIALIZED = false;
         this.MENU_INITIALIZED = false;
+        this.CAMERA_ZOOMED = false;
 
         this.createBackground();
-        this.text = this.add.text(32, 32, { color: '#fff' });
-
+        
         var spaceAtlasTexture = this.textures.get('space');
-
         var spaceFrames = spaceAtlasTexture.getFrameNames();
-        //for (var i = 0; i < spaceFrames.length; i++){
-        //    console.log(spaceFrames[i]);
-        //}
 
-        //var player_keys = this.input.keyboard.createCursorKeys();
-        //player_keys.fire = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
         this.player_keys = {
             up: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP),
             left: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT),
@@ -60,19 +53,47 @@ class GameScene extends Phaser.Scene {
             alt_up: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W),
             alt_left: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A),
             alt_right: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D),
-            alt_down: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S),            
+            alt_down: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S),  
+
             fire: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE),
+            turbo: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT),
         };
         this.createShip();
         //this.createAsteroids(); moved in update
     
         //this.MKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.M);
-        this.MenuKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
+        this.toggleMenuKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
         this.physics.world.drawDebug = false;
         this.toggleDebug = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P);
+        this.toggleMapZoom = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.M);
         this.createSounds();
 
+        // UI
+        this.ui_container = this.add.container()
+        this.ui_container.setScrollFactor(0)
+
+        this.text = this.add.text(32, 32, { color: '#fff' });
+        //this.text.setScrollFactor(0);
         this.radar = new Radar(this);
+
+
+        this.ui_container.add(this.text)
+        //this.ui_container.add(this.radar)
+
+        /*
+        attempts at using containers for separating elements from main camera does not work properly
+        radar throws errors
+        ship not redered
+        bullets not rendered
+        new asteroids not rendered
+        */
+        
+        //this.ui_container.add(this.radar)
+
+        //this.cameras.main.ignore(this.ui_container);        
+        
+        //this.ui_camera = this.cameras.add(0, 0, this.game_width, this.game_height);
+        //this.ui_camera.ignore(this.ship)
 
         //PhaserGUIAction(this);  //takes a very long time to load when asteroids are created here, moved to update
         console.log('gamescene ready');
@@ -107,7 +128,7 @@ class GameScene extends Phaser.Scene {
         });
     }
 
-    createMinimap(){
+    DEPRECATED_createMinimap(){
         let margin = 10
         let minimapWidth = 400
         let minimapHeight = 200
@@ -125,7 +146,8 @@ class GameScene extends Phaser.Scene {
             key: 'ship',
             texture: 'space',
             x: this.WORLD_WIDTH / 2,
-            y: this.WORLD_HEIGHT / 2
+            y: this.WORLD_HEIGHT / 2,
+            keys: this.player_keys
                 //x: 48, //this.WORLD_WIDTH/2,
                 //y: 48 //this.WORLD_HEIGHT/2 //this.sys.game.config.height - 48 - 48
         });
@@ -267,14 +289,16 @@ class GameScene extends Phaser.Scene {
     }
 
 
-
+    updateUI(){
+        //TODO update ui_cam in case the window size changes
+    }
 
     updateScore(score, time) {
         //this.text.setPosition(ship.x, ship.y - 30);
         var outstr = "";
         
         if (this.cameras.cameras !==undefined) {
-            this.text.setPosition(this.cameras.main.scrollX+50, this.cameras.main.scrollY+50);
+            //this.text.setPosition(this.cameras.main.scrollX+50, this.cameras.main.scrollY+50);
             outstr += '\n'+'Camera('+ 'sx: '+this.cameras.main.scrollX.toFixed(2) +','+ 'sy: '+this.cameras.main.scrollY.toFixed(2)+')';
         }
 
@@ -322,7 +346,21 @@ class GameScene extends Phaser.Scene {
         //https://labs.phaser.io/edit.html?src=src/input/keyboard/key%20down%20duration.js&v=3.55.2
         //https://labs.phaser.io/edit.html?src=src/input/keyboard/key%20down%20delay.js&v=3.55.2
 
-        if (this.input.keyboard.checkDown( this.MenuKey, 250 ))
+        if (this.input.keyboard.checkDown( this.toggleMapZoom, 250 ))
+        {
+            this.CAMERA_ZOOMED = !this.CAMERA_ZOOMED
+            
+        }
+        
+        if (this.CAMERA_ZOOMED){
+            this.cameras.main.zoom= 0.2
+        }
+        else{
+            this.cameras.main.zoom =1
+        }
+
+
+        if (this.input.keyboard.checkDown( this.toggleMenuKey, 250 ))
         {
             if (this.MENU_INITIALIZED == false){
                 this.menu = new Menu(this);
