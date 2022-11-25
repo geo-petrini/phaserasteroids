@@ -6,6 +6,7 @@ Better ship-asteroid collision
 - remove shield amount by asteroid size or velocity
 - when shield depleted destroy ship
 - split asteroid  
+- added healthbar with damage and regenerations
 - shake camera (DONE)
 
 Better asteoid generation

@@ -1,6 +1,9 @@
+import HealthBar from './healthbar.js';
+
 export default class Ship extends Phaser.GameObjects.Sprite {
     
     lastFired = null;
+    lastRepaired = null;
     
     
     constructor(config) {
@@ -11,9 +14,11 @@ export default class Ship extends Phaser.GameObjects.Sprite {
         this.type = 'ship';
         this.name = 'playerShip';
 
+
         this.ROTATION = 100
         this.ACCELERATION = 40
         this.FIREINTERVALL = 5;
+        this.REPAIRINTERVALL = 1000;
 
         this.setScale(0.5);
         //this.body.maxVelocity.x = 600;
@@ -30,6 +35,11 @@ export default class Ship extends Phaser.GameObjects.Sprite {
         //this.setDrag(200);
         //this.setAngularDrag(150);
         //ship.setMaxVelocity(700);	//wrong axes https://phaser.discourse.group/t/arcade-physics-incorrect-velocity-vector-when-trying-to-fly-forward/4126        
+
+        this.hb = new HealthBar(this.config.scene, 0, 0, 32, 4);
+        //this.repairEvent = this.config.scene.time.addEvent({ delay: 1000, callback: this.repairHull, callbackScope: this, loop: true });
+        //this.repairEvent = this.config.scene.time.addEvent({ delay: 1000, loop: true });
+
         console.log(this);     
     }
 
@@ -38,8 +48,25 @@ export default class Ship extends Phaser.GameObjects.Sprite {
         this.bulletSound = bulletSound
     }
 
+    damage(amount){
+        this.hb.decrease(amount)
+    }
+
+    repairHull(){
+        console.log('repairing hb: '+this.hb.value)
+        if (this.hb.value < 100){
+            this.hb.increase(1)
+        }
+    }
+
+    _repositionHealthBar(){
+        this.hb.x = this.x - this.body.width/2
+        this.hb.y = this.y + this.body.height
+        this.hb.draw()
+    }
+
     update(keys, time, delta) {
-        
+        this._repositionHealthBar()
         if (keys == null) {
             
         }else{
@@ -87,6 +114,11 @@ export default class Ship extends Phaser.GameObjects.Sprite {
                     this.lastFired = time + this.FIREINTERVALL;
                     this.config.scene.sounds['laser'].play();
                 }
+            }
+
+            if(time > this.lastRepaired){
+                this.repairHull()
+                this.lastRepaired = time + this.REPAIRINTERVALL;                
             }
         
         }

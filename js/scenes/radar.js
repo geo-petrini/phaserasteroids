@@ -81,7 +81,8 @@ export default class Radar {
         //assert minX <= maxX;
         //assert minY <= maxY;
         if (validate && (minX < x && x < maxX) && (minY < y && y < maxY)) 
-            throw "Point " + [x,y] + " cannot be inside " + "the rectangle: " + [minX, minY] + " - " + [maxX, maxY] + ".";
+            //throw "Point " + [x,y] + " cannot be inside " + "the rectangle: " + [minX, minY] + " - " + [maxX, maxY] + ".";
+            return false
         var midX = (minX + maxX) / 2;
         var midY = (minY + maxY) / 2;
         // if (midX - x == 0) -> m == ±Inf -> minYx/maxYx == x (because value / ±Inf = ±0)

@@ -225,6 +225,8 @@ class GameScene extends Phaser.Scene {
     collideShipAsteroid(ship, asteroid){
         console.log('BOOM'); 
 
+        ship.damage(10);    //TODO damage on asteroid size and speed
+
         asteroid.createChild();
         asteroid.createChild();
         asteroid.destroy();
