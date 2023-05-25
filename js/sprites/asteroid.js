@@ -1,3 +1,4 @@
+import * as fx from './fx.js';
 export default class Asteroid extends Phaser.GameObjects.Sprite {
     constructor(config) {
         super(config.scene, config.x, config.y, config.key);
@@ -64,11 +65,14 @@ export default class Asteroid extends Phaser.GameObjects.Sprite {
             var asteroid = new Asteroid({ scene: this.config.scene, key: this.config.key, x: this.x, y: this.y, type: childType });
         }
         
-        this._createSmokeFX();
-        this._createFlameFX();
+        // this._createSmokeFX();
+        // this._createFlameFX();
+        fx.createSmokeFX(this.x, this.y, this.config.scene)
+        fx.createFlameFX(this.x, this.y, this.config.scene)
        
         if (this.type == 'BIG') {
-            this._createBlastFX();
+            // this._createBlastFX();
+            fx.createBlastFX(this.x, this.y, this.config.scene)
         }    
     }
 

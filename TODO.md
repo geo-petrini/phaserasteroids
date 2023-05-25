@@ -26,6 +26,7 @@ Gameplay
 - make asteroids more dangerous (faster by size)
 - asteroid size affects damage to ship
 - improve ship handling (DONE)
+- add phaser energy bank (DONE)
 - implement powerups (buy at station or drops)
     - handling
     - speed
