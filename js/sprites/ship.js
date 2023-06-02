@@ -24,7 +24,7 @@ export default class Ship extends Phaser.GameObjects.Sprite {
         this.FIRE_INTERVALL = 5;
         this.REPAIR_INTERVALL = 1000;
         this.REPAIR_AMOUNT = 1;
-        this.WEAPONS_RECHARGE_INTERVALL = 200;
+        this.WEAPONS_RECHARGE_INTERVALL = 100;
         this.WEAPONS_RECHARGE_AMOUNT = 1;
         this.TURBO_INTERVALL = 2000;
 
@@ -46,7 +46,7 @@ export default class Ship extends Phaser.GameObjects.Sprite {
         //ship.setMaxVelocity(700);	//wrong axes https://phaser.discourse.group/t/arcade-physics-incorrect-velocity-vector-when-trying-to-fly-forward/4126        
 
         this.hull_hb = new HealthBar({ scene: this.config.scene, width: 32, height: 4 });
-        this.weapons_hb = new HealthBar({ scene: this.config.scene, width: 32, height: 4, fill_color: 0xffff00 });
+        this.weapons_hb = new HealthBar({ scene: this.config.scene, width: 32, height: 4, fill_color: 0xff9c00 });
         this.turbo_hb = new HealthBar({ scene: this.config.scene, width: 32, height: 4, fill_color: 0x00ffff });
         //this.repairEvent = this.config.scene.time.addEvent({ delay: 1000, callback: this.repairHull, callbackScope: this, loop: true });
         //this.repairEvent = this.config.scene.time.addEvent({ delay: 1000, loop: true });
@@ -85,14 +85,14 @@ export default class Ship extends Phaser.GameObjects.Sprite {
         //TODO display wreckage
     }
 
-    repairHull() {
+    _repairHull() {
         if (this.hull_hb.value < 100) {
             // console.log('repairing hb: '+this.hull_hb.value)
             this.hull_hb.increase(this.REPAIR_AMOUNT)
         }
     }
 
-    rechargeWeapons() {
+    _rechargeWeapons() {
         if (this.weapons_hb.value < 100) {
             // console.log('recharging weapons: '+this.weapons_hb.value)
             this.weapons_hb.increase(this.WEAPONS_RECHARGE_AMOUNT)
@@ -114,6 +114,40 @@ export default class Ship extends Phaser.GameObjects.Sprite {
         this.turbo_hb.draw()
     }
 
+    _rotate(direction) {
+        if (direction == "left") {
+            this.body.setAngularVelocity(this.ROTATION * -1);
+        }
+        if (direction == "right") {
+            this.body.setAngularVelocity(this.ROTATION);
+        }
+    }
+
+    _accelerate(turbo = false) {
+        const vector = this.config.scene.physics.velocityFromRotation(this.rotation, 1);//, this.body.velocity);
+        const vel = this.body.velocity
+        if (turbo) {
+            vel.x += vector.x * this.body.acceleration * this.TURBO_ACCELERATION_INCREMENT
+            vel.y += vector.y * this.body.acceleration * this.TURBO_ACCELERATION_INCREMENT
+        } else {
+            vel.x += vector.x * this.body.acceleration
+            vel.y += vector.y * this.body.acceleration
+        }
+        this.body.setVelocity(vel.x, vel.y)
+    }
+
+    _fire(time) {
+        var bullet = this.bullets.get();
+
+        if (bullet) {
+            bullet.fire(this);
+            bullet.setDepth(this.depth - 1);
+            this.lastFired = time + this.FIRE_INTERVALL;
+            this.config.scene.sounds['laser'].play();
+            this.weapons_hb.decrease(1)
+        }
+    }
+
     update(keys, time, delta) {
         this._repositionHealthBars()
 
@@ -126,69 +160,34 @@ export default class Ship extends Phaser.GameObjects.Sprite {
         } else {
             //console.log('ship: (' + this.x + ';' + this.y + ')')
             if (keys.left.isDown || keys.alt_left.isDown) {
-                this.body.setAngularVelocity(this.ROTATION * -1);
-            } else if (keys.right.isDown || keys.alt_right.isDown) {
-                this.body.setAngularVelocity(this.ROTATION);
-            } else {
-                //this.setAngularVelocity(0)
-                //this.body.angularVelocity = 0;;
+                this._rotate("left")
             }
-
-
+            if (keys.right.isDown || keys.alt_right.isDown) {
+                this._rotate("right")
+            }
 
             if (keys.up.isDown || keys.alt_up.isDown) {
-                //this.physics.velocityFromRotation(this.rotation, 600, this.body.acceleration);
-                const vector = this.config.scene.physics.velocityFromRotation(this.rotation, 1);//, this.body.velocity);
-                const vel = this.body.velocity
+                this._accelerate();
+            }
+            if (keys.turbo.isDown && time > this.lastTurbo) {
+                this._accelerate(true);
 
-                vel.x += vector.x * this.body.acceleration
-                vel.y += vector.y * this.body.acceleration
-
-                this.body.setVelocity(vel.x, vel.y)
-
-            } else {
-                //this.body.acceleration = 10
-                /*if(this.body.velocity.x>0){
-                    this.body.velocity.x = Math.max(this.body.velocity.x * this.body.acceleration*-1, 0)
-                }
-                if(this.body.velocity.y>0){
-                    this.body.velocity.y = Math.max(this.body.velocity.y - this.body.acceleration, 0)
-                } */
-                //console.log(this.body.velocity)
-
-                //this.setAcceleration(0);
+                this.lastTurbo = time + this.TURBO_INTERVALL;
             }
 
-
             if (keys.fire.isDown && time > this.lastFired && this.weapons_hb.value > 0) {
-                var bullet = this.bullets.get();
-
-                if (bullet) {
-                    bullet.fire(this);
-                    bullet.setDepth(this.depth - 1);
-                    this.lastFired = time + this.FIRE_INTERVALL;
-                    this.config.scene.sounds['laser'].play();
-                    this.weapons_hb.decrease(1)
-                }
+                this._fire(time);
             }
 
             if (time > this.lastRepaired) {
-                this.repairHull()
+                this._repairHull()
                 this.lastRepaired = time + this.REPAIR_INTERVALL;
             }
             if (time > this.lastWeaponsRecharge) {
-                this.rechargeWeapons()
+                this._rechargeWeapons()
                 this.lastWeaponsRecharge = time + this.WEAPONS_RECHARGE_INTERVALL;
             }
 
-            /*if (keys.turbo.isDown && time > this.lastTurbo)
-            {
-                this.config.scene.debug('turbo')
-                vel.x += vector.x * this.body.acceleration * this.TURBO_ACCELERATION_INCREMENT
-                vel.y += vector.y * this.body.acceleration * this.TURBO_ACCELERATION_INCREMENT    
-                
-                this.lastTurbo = time + this.TURBO_INTERVALL;
-            } */
 
         }
     }

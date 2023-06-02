@@ -346,15 +346,15 @@ class GameScene extends Phaser.Scene {
                 }
             }
 
+            this.radar.update();
 
-            this.updateScore(0, time)
             this.ship.update(this.player_keys, time, delta);
-
+            
             this.asteroidsArray.forEach(function (asteroid) {
                 asteroid.update();
             });
-
-            this.radar.update();
+            
+            this.updateScore(0, time)
 
             //this.physics.arcade.collide(ship, asteroids);
             //this.physics.arcade.collide(asteroids, asteroids);
