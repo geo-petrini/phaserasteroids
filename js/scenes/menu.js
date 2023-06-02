@@ -20,13 +20,16 @@ class Menu{
         /*
         center menu in the camera view
         */
+        let backgroundRoundedRectangle = this.scene.rexUI.add.roundRectangle(0, 0, 100, 100, 20, 0x181d80)
+        backgroundRoundedRectangle.setAlpha(0.5);
 
         this.dialog = this.scene.rexUI.add.dialog({
             x: this.calcXPosition(),
             y: this.calcYPosition(),
             width: this.menuWidth,
     
-            background: this.scene.rexUI.add.roundRectangle(0, 0, 100, 100, 20, 0x1565c0),
+
+            background: backgroundRoundedRectangle,
     
             title: this.createLabel('Title').setDraggable(),
     

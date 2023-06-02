@@ -24,8 +24,10 @@ export default class Ship extends Phaser.GameObjects.Sprite {
         this.FIRE_INTERVALL = 5;
         this.REPAIR_INTERVALL = 1000;
         this.REPAIR_AMOUNT = 1;
-        this.WEAPONS_RECHARGE_INTERVALL = 100;
-        this.WEAPONS_RECHARGE_AMOUNT = 1;
+        this.WEAPONS_CHARGE_MAX = 20;
+        this.WEAPONS_RECHARGE_INTERVALL = 10;
+        this.WEAPONS_RECHARGE_AMOUNT = 0.05;
+        this.WEAPONS_BULLET_DISCHARGE_AMOUNT = 1;
         this.TURBO_INTERVALL = 2000;
 
 
@@ -137,14 +139,16 @@ export default class Ship extends Phaser.GameObjects.Sprite {
     }
 
     _fire(time) {
-        var bullet = this.bullets.get();
+        if (this.weapons_hb.value > this.WEAPONS_BULLET_DISCHARGE_AMOUNT) {
+            var bullet = this.bullets.get();
 
-        if (bullet) {
-            bullet.fire(this);
-            bullet.setDepth(this.depth - 1);
-            this.lastFired = time + this.FIRE_INTERVALL;
-            this.config.scene.sounds['laser'].play();
-            this.weapons_hb.decrease(1)
+            if (bullet) {
+                bullet.fire(this);
+                bullet.setDepth(this.depth - 1);
+                this.lastFired = time + this.FIRE_INTERVALL;
+                this.config.scene.sounds['laser'].play();
+                this.weapons_hb.decrease(1)
+            }
         }
     }
 
@@ -175,7 +179,7 @@ export default class Ship extends Phaser.GameObjects.Sprite {
                 this.lastTurbo = time + this.TURBO_INTERVALL;
             }
 
-            if (keys.fire.isDown && time > this.lastFired && this.weapons_hb.value > 0) {
+            if (keys.fire.isDown && time > this.lastFired) {
                 this._fire(time);
             }
 

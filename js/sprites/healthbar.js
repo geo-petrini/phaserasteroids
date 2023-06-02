@@ -1,6 +1,6 @@
 export default class HealthBar {
 
-    constructor({ scene, x = 0, y = 0, width = 80, height = 16, fill_color = 0x00ff00, warn_color = 0xffff00, danger_color = 0xff0000, border_color = 0x000000, empty_color = 0xffffff }) {
+    constructor({ scene, x = 0, y = 0, width = 80, height = 16, fill_color = 0x00ff00, warn_color = 0xffff00, danger_color = 0xff0000, border_color = 0x000000, empty_color = 0xffffff, max_value = 100, danger_value = 30, warn_value = 50 }) {
         this.bar = new Phaser.GameObjects.Graphics(scene);
 
         this.x = x;
@@ -8,8 +8,13 @@ export default class HealthBar {
         this.height = height;
         this.width = width;
         this.margin = 1;
-        this.value = 100;
-        this.p = this.width / 100;
+        this.max_value = max_value;
+        this.value = this.max_value;
+        this.danger_value = 
+        
+        this.pixel_value = this.width / this.max_value;
+
+
         this.fill_color = fill_color
         this.warn_color = warn_color
         this.danger_color = danger_color
@@ -37,13 +42,13 @@ export default class HealthBar {
     increase(amount) {
         this.value += amount;
 
-        if (this.value > 100) {
-            this.value = 100;
+        if (this.value > this.max_value) {
+            this.value = this.max_value;
         }
 
         this.draw();
 
-        return (this.value === 100);
+        return (this.value === this.max_value);
     }
 
     draw() {
@@ -71,7 +76,7 @@ export default class HealthBar {
             this.bar.fillStyle(this.fill_color);
         }
 
-        var d = Math.floor(this.p * this.value);
+        var d = Math.floor(this.pixel_value * this.value);
 
         this.bar.fillRect(this.x + 2, this.y + 2, d, this.height - this.margin * 2);
 
