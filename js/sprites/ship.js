@@ -22,9 +22,10 @@ export default class Ship extends Phaser.GameObjects.Sprite {
         this.ACCELERATION = 40
         this.TURBO_ACCELERATION_INCREMENT = 5
         this.FIRE_INTERVALL = 5;
-        this.REPAIR_INTERVALL = 1000;
-        this.REPAIR_AMOUNT = 1;
-        this.WEAPONS_CHARGE_MAX = 20;
+        //NOT USED this.HULL_AMOUNT = 10;  
+        this.HULL_REPAIR_INTERVALL = 10;
+        this.HULL_REPAIR_AMOUNT = 0.001;
+        //NOT USED this.WEAPONS_CHARGE_MAX = 20;   
         this.WEAPONS_RECHARGE_INTERVALL = 10;
         this.WEAPONS_RECHARGE_AMOUNT = 0.05;
         this.WEAPONS_BULLET_DISCHARGE_AMOUNT = 1;
@@ -87,10 +88,16 @@ export default class Ship extends Phaser.GameObjects.Sprite {
         //TODO display wreckage
     }
 
+    _checkOptions(){
+        const options = this.config.scene.options;
+        this.HULL_REPAIR_AMOUNT = options.player_hull_repair_amount
+        this.WEAPONS_RECHARGE_AMOUNT = options.player_weapons_recharge_amount
+    }
+
     _repairHull() {
         if (this.hull_hb.value < 100) {
             // console.log('repairing hb: '+this.hull_hb.value)
-            this.hull_hb.increase(this.REPAIR_AMOUNT)
+            this.hull_hb.increase(this.HULL_REPAIR_AMOUNT)
         }
     }
 
@@ -153,6 +160,7 @@ export default class Ship extends Phaser.GameObjects.Sprite {
     }
 
     update(keys, time, delta) {
+        this._checkOptions()
         this._repositionHealthBars()
 
         if (this.hull_hb.value <= 0) {
@@ -185,7 +193,7 @@ export default class Ship extends Phaser.GameObjects.Sprite {
 
             if (time > this.lastRepaired) {
                 this._repairHull()
-                this.lastRepaired = time + this.REPAIR_INTERVALL;
+                this.lastRepaired = time + this.HULL_REPAIR_INTERVALL;
             }
             if (time > this.lastWeaponsRecharge) {
                 this._rechargeWeapons()

@@ -2,12 +2,14 @@ import Ship from '../sprites/ship.js'
 import Bullet from '../sprites/bullet.js'
 import Asteroid from '../sprites/asteroid.js';
 
+import Options from './options.js';
 import Menu from './menu.js';
 import MiniMap from './minimap.js';
 import Radar from './radar.js';
 
 
 class GameScene extends Phaser.Scene {
+    options = new Options()
     asteroidsArray = [];
 
     constructor(test) {
@@ -27,6 +29,7 @@ class GameScene extends Phaser.Scene {
 
     create() {
         console.log('gamescene create');
+
         let { game_width, game_height } = this.sys.game.canvas;
         this.game_width = game_width;
         this.game_height = game_height;
@@ -179,9 +182,9 @@ class GameScene extends Phaser.Scene {
             var asteroid = new Asteroid({ scene: this, x: asteroidX, y: asteroidY, key: asteroidKey, type: 'BIG' });
         }
 
-        this.physics.add.collider(this.ship, this.asteroidsGroup, this.collideShipAsteroid);
+        this.collider_ship_asteroids = this.physics.add.collider(this.ship, this.asteroidsGroup, this.collideShipAsteroid);
         //this.physics.add.collider(this.asteroidsGroup,this.asteroidsGroup, this.collideAsteroid);
-        this.physics.add.collider(this.bullets, this.asteroidsGroup, this.collideBulletAsteroid);
+        this.collider_bullets_asteroids = this.physics.add.collider(this.bullets, this.asteroidsGroup, this.collideBulletAsteroid);
 
         console.log('asteroids: ' + this.asteroidsArray.length)
     }
@@ -222,7 +225,7 @@ class GameScene extends Phaser.Scene {
     collideShipAsteroid(ship, asteroid) {
         console.log('BOOM');
 
-        ship.damage(10);    //TODO damage on asteroid size and speed
+        ship.damage(10);    //TODO damage based on asteroid size and speed
 
         asteroid.createChild();
         asteroid.createChild();
@@ -297,6 +300,12 @@ class GameScene extends Phaser.Scene {
     }
 
     update(time, delta) {
+
+        if (this.ASTEROIDS_INITIALIZED == true) {
+            this.collider_ship_asteroids.active = this.options.player_enable_ship_asteroids_collision;
+            this.collider_bullets_asteroids.active = this.options.player_enable_bullets_asteroids_collision;
+        }
+        
         if (this.ship.removedFromScene() || typeof this.ship === 'undefined' || this.ship === null || this.ship.status == 'destroyed') {
             //TODO display GAME OVER
             console.log('GAME OVER')
