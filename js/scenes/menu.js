@@ -1,4 +1,11 @@
+const COLOR_BACKGROUND = 0x181d80;
+const COLOR_PRIMARY = 0x5e92f3;
+const COLOR_LIGHT = 0x5eb0f3;
+const FONT_SIZE = '24px';
 class Menu{
+
+
+
     constructor(scene){
         console.log('menu constructor begin');
         this.scene = scene;
@@ -20,7 +27,7 @@ class Menu{
         /*
         center menu in the camera view
         */
-        let backgroundRoundedRectangle = this.scene.rexUI.add.roundRectangle(0, 0, 100, 100, 20, 0x181d80)
+        let backgroundRoundedRectangle = this.scene.rexUI.add.roundRectangle(0, 0, 100, 100, 20, COLOR_BACKGROUND)
         backgroundRoundedRectangle.setAlpha(0.5);
 
         this.dialog = this.scene.rexUI.add.dialog({
@@ -50,9 +57,10 @@ class Menu{
             choices: [
                 this.createLabel('Choice0'),
                 this.createLabel('Choice1'),
-                this.createLabel('Choice2')
+                this.createLabel('Choice2'),
+                this.createNumberSlider(),
             ],
-    
+
             actions: [
                 this.createLabel('Action0'),
                 this.createLabel('Action1')
@@ -121,12 +129,12 @@ class Menu{
         this.dialog.on('button.click', function (button, groupName, index, pointer, event) {
             this.scene.print.text += groupName + '-' + index + ': ' + button.text + '\n';
         }, this)
-        this.dialog.on('button.over', function (button, groupName, index, pointer, event) {
-            button.getElement('background').setStrokeStyle(1, 0xffffff);
-        })
-        this.dialog.on('button.out', function (button, groupName, index, pointer, event) {
-            button.getElement('background').setStrokeStyle();
-        });
+        // this.dialog.on('button.over', function (button, groupName, index, pointer, event) {
+        //     button.getElement('background').setStrokeStyle(1, 0xffffff);
+        // })
+        // this.dialog.on('button.out', function (button, groupName, index, pointer, event) {
+        //     button.getElement('background').setStrokeStyle();
+        // });
     
     }
     
@@ -135,11 +143,9 @@ class Menu{
             width: 40, // Minimum width of round-rectangle
             height: 40, // Minimum height of round-rectangle
           
-            background: this.scene.rexUI.add.roundRectangle(0, 0, 100, 40, 20, 0x5e92f3),
+            background: this.scene.rexUI.add.roundRectangle(0, 0, 100, 40, 20, COLOR_PRIMARY),
     
-            text: this.scene.add.text(0, 0, text, {
-                fontSize: '24px'
-            }),
+            text: this.scene.add.text(0, 0, text, {fontSize: FONT_SIZE}),
     
             space: {
                 left: 10,
@@ -148,6 +154,30 @@ class Menu{
                 bottom: 10
             }
         });
+    }
+
+
+    createNumberSlider(value = 0, value_min = 0, value_max = 100, gap = 1){
+        //https://codepen.io/rexrainbow/pen/jXWebo
+        //https://rexrainbow.github.io/phaser3-rex-notes/docs/site/ui-numberbar/
+        var range = value_max - value_min
+        var slider = this.scene.rexUI.add.numberBar({
+            width : 40,
+            height : 40,
+            text: this.scene.add.text(0, 0, '', {fontSize: FONT_SIZE}),
+            //background: this.scene.rexUI.add.roundRectangle(0, 0, 0, 0, 20, COLOR_PRIMARY),
+            slider:{
+                track: this.scene.rexUI.add.roundRectangle(0, 0, 0, 0, 20, COLOR_PRIMARY),
+                indicator: this.scene.rexUI.add.roundRectangle(0, 0, 0, 0, 20, COLOR_LIGHT),  
+                input: 'drag',
+                gap: gap / range,
+            },
+            // valuechangeCallback: function (value, oldValue, object) {
+            //     value = (value * range) + value_min;
+            //     object.text = value;
+            // },
+        })
+        return slider;
     }
 
     calcXPosition(){

@@ -11,6 +11,9 @@ class Options{
         this.player_weapons_recharge_amount = 0.05;
         this.player_enable_ship_asteroids_collision = true;
         this.player_enable_bullets_asteroids_collision = true;
+
+        this.volume_bullets = 1.0;
+        this.volume_explosions = 1.0;
     }
 
 }

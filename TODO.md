@@ -13,6 +13,9 @@ Better asteoid generation
 - ISSUE currently 800 asteroids are created (this.WORLD_WIDTH*0.1), it takes some time to generate them
 - create asteroids based on ship vicinity
 
+Particles
+- implement new system https://newdocs.phaser.io/docs/3.60.0/Phaser.GameObjects.Particles.ParticleEmitter
+
 Radar
 - implement a minimap/radar that shows the asteroids location (DONE)
 - fix stuttering (possible cause: camera bounds)

@@ -51,7 +51,7 @@ export function createBlastFX(x, y, scene) {
 
 export function createTrail(source, scene) {
     var particles = scene.add.particles('space');
-
+    //TODO refactor this for v 3.60, see doc https://newdocs.phaser.io/docs/3.60.0/Phaser.GameObjects.Particles.ParticleEmitter
     var emitterTrail = particles.createEmitter({
         frame: 'blue',
         speed: 100,

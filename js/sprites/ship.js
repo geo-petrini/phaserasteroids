@@ -27,8 +27,8 @@ export default class Ship extends Phaser.GameObjects.Sprite {
         this.HULL_REPAIR_AMOUNT = 0.001;
         //NOT USED this.WEAPONS_CHARGE_MAX = 20;   
         this.WEAPONS_RECHARGE_INTERVALL = 10;
-        this.WEAPONS_RECHARGE_AMOUNT = 0.05;
-        this.WEAPONS_BULLET_DISCHARGE_AMOUNT = 1;
+        this.WEAPONS_RECHARGE_AMOUNT = 0.1;
+        this.WEAPONS_BULLET_DISCHARGE_AMOUNT = 5;
         this.TURBO_INTERVALL = 2000;
 
 
@@ -153,7 +153,7 @@ export default class Ship extends Phaser.GameObjects.Sprite {
                 bullet.fire(this);
                 bullet.setDepth(this.depth - 1);
                 this.lastFired = time + this.FIRE_INTERVALL;
-                this.config.scene.sounds['laser'].play();
+                this.config.scene.sounds['laser'].play({'volume':this.config.scene.options.volume_bullets});
                 this.weapons_hb.decrease(1)
             }
         }

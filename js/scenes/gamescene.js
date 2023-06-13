@@ -36,8 +36,8 @@ class GameScene extends Phaser.Scene {
         this.WORLD_WIDTH = 8000;
         this.WORLD_HEIGHT = 8000;
         //this.MAX_ASTEROIDS = this.WORLD_WIDTH*0.1;
-        //this.MAX_ASTEROIDS = 80;
-        this.MAX_ASTEROIDS = 800;
+        this.MAX_ASTEROIDS = 80;
+        //this.MAX_ASTEROIDS = 800;
         this.ASTEROIDS_INITIALIZED = false;
         this.MENU_INITIALIZED = false;
         this.CAMERA_ZOOMED = false;
@@ -305,7 +305,7 @@ class GameScene extends Phaser.Scene {
             this.collider_ship_asteroids.active = this.options.player_enable_ship_asteroids_collision;
             this.collider_bullets_asteroids.active = this.options.player_enable_bullets_asteroids_collision;
         }
-        
+
         if (this.ship.removedFromScene() || typeof this.ship === 'undefined' || this.ship === null || this.ship.status == 'destroyed') {
             //TODO display GAME OVER
             console.log('GAME OVER')
