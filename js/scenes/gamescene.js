@@ -44,28 +44,9 @@ class GameScene extends Phaser.Scene {
         var spaceAtlasTexture = this.textures.get('space');
         var spaceFrames = spaceAtlasTexture.getFrameNames();
 
-        this.player_keys = {
-            up: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP),
-            left: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT),
-            right: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT),
-            down: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN),
+        this.createKeys();
 
-            alt_up: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W),
-            alt_left: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A),
-            alt_right: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D),
-            alt_down: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S),
-
-            fire: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE),
-            turbo: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT),
-        };
         this.createShip();
-        //this.createAsteroids(); moved in update
-
-        //this.MKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.M);
-        this.toggleMenuKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
-        this.physics.world.drawDebug = false;
-        this.toggleDebug = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P);
-        this.toggleMapZoom = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.M);
         this.createSounds();
 
         // UI
@@ -203,6 +184,30 @@ class GameScene extends Phaser.Scene {
         this.physics.add.collider(this.bullets, this.asteroidsGroup, this.collideBulletAsteroid);
 
         console.log('asteroids: ' + this.asteroidsArray.length)
+    }
+
+    createKeys(){
+        this.player_keys = {
+            up: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP),
+            left: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT),
+            right: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT),
+            down: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN),
+
+            alt_up: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W),
+            alt_left: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A),
+            alt_right: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D),
+            alt_down: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S),
+
+            fire: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE),
+            turbo: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT),
+        };
+        //this.createAsteroids(); moved in update
+        
+        //this.MKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.M);
+        this.toggleMenuKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.O);
+        this.physics.world.drawDebug = false;
+        this.toggleDebug = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P);
+        this.toggleMapZoom = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.M);        
     }
 
     createSounds() {
