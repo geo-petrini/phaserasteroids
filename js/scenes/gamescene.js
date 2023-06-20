@@ -2,12 +2,14 @@ import Ship from '../sprites/ship.js'
 import Bullet from '../sprites/bullet.js'
 import Asteroid from '../sprites/asteroid.js';
 
+import Options from './options.js';
 import Menu from './menu.js';
 import MiniMap from './minimap.js';
 import Radar from './radar.js';
 
 
 class GameScene extends Phaser.Scene {
+    options = new Options()
     asteroidsArray = [];
 
     constructor(test) {
@@ -27,14 +29,15 @@ class GameScene extends Phaser.Scene {
 
     create() {
         console.log('gamescene create');
+
         let { game_width, game_height } = this.sys.game.canvas;
         this.game_width = game_width;
         this.game_height = game_height;
         this.WORLD_WIDTH = 8000;
         this.WORLD_HEIGHT = 8000;
         //this.MAX_ASTEROIDS = this.WORLD_WIDTH*0.1;
-        //this.MAX_ASTEROIDS = 80;
-        this.MAX_ASTEROIDS = 800;
+        this.MAX_ASTEROIDS = 80;
+        //this.MAX_ASTEROIDS = 800;
         this.ASTEROIDS_INITIALIZED = false;
         this.MENU_INITIALIZED = false;
         this.CAMERA_ZOOMED = false;
@@ -44,28 +47,9 @@ class GameScene extends Phaser.Scene {
         var spaceAtlasTexture = this.textures.get('space');
         var spaceFrames = spaceAtlasTexture.getFrameNames();
 
-        this.player_keys = {
-            up: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP),
-            left: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT),
-            right: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT),
-            down: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN),
+        this.createKeys();
 
-            alt_up: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W),
-            alt_left: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A),
-            alt_right: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D),
-            alt_down: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S),
-
-            fire: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE),
-            turbo: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT),
-        };
         this.createShip();
-        //this.createAsteroids(); moved in update
-
-        //this.MKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.M);
-        this.toggleMenuKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
-        this.physics.world.drawDebug = false;
-        this.toggleDebug = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P);
-        this.toggleMapZoom = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.M);
         this.createSounds();
 
         // UI
@@ -199,11 +183,35 @@ class GameScene extends Phaser.Scene {
             var asteroid = new Asteroid({ scene: this, x: asteroidX, y: asteroidY, key: asteroidKey, type: 'BIG' });
         }
 
-        this.physics.add.collider(this.ship, this.asteroidsGroup, this.collideShipAsteroid);
+        this.collider_ship_asteroids = this.physics.add.collider(this.ship, this.asteroidsGroup, this.collideShipAsteroid);
         //this.physics.add.collider(this.asteroidsGroup,this.asteroidsGroup, this.collideAsteroid);
-        this.physics.add.collider(this.bullets, this.asteroidsGroup, this.collideBulletAsteroid);
+        this.collider_bullets_asteroids = this.physics.add.collider(this.bullets, this.asteroidsGroup, this.collideBulletAsteroid);
 
         console.log('asteroids: ' + this.asteroidsArray.length)
+    }
+
+    createKeys(){
+        this.player_keys = {
+            up: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP),
+            left: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT),
+            right: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT),
+            down: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN),
+
+            alt_up: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W),
+            alt_left: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A),
+            alt_right: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D),
+            alt_down: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S),
+
+            fire: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE),
+            turbo: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT),
+        };
+        //this.createAsteroids(); moved in update
+        
+        //this.MKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.M);
+        this.toggleMenuKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.O);
+        this.physics.world.drawDebug = false;
+        this.toggleDebug = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P);
+        this.toggleMapZoom = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.M);        
     }
 
     createSounds() {
@@ -218,7 +226,7 @@ class GameScene extends Phaser.Scene {
     collideShipAsteroid(ship, asteroid) {
         console.log('BOOM');
 
-        ship.damage(10);    //TODO damage on asteroid size and speed
+        ship.damage(10);    //TODO damage based on asteroid size and speed
 
         asteroid.createChild();
         asteroid.createChild();
@@ -293,6 +301,12 @@ class GameScene extends Phaser.Scene {
     }
 
     update(time, delta) {
+
+        if (this.ASTEROIDS_INITIALIZED == true) {
+            this.collider_ship_asteroids.active = this.options.player_enable_ship_asteroids_collision;
+            this.collider_bullets_asteroids.active = this.options.player_enable_bullets_asteroids_collision;
+        }
+
         if (this.ship.removedFromScene() || typeof this.ship === 'undefined' || this.ship === null || this.ship.status == 'destroyed') {
             //TODO display GAME OVER
             console.log('GAME OVER')

@@ -103,7 +103,7 @@ export default class Asteroid extends Phaser.GameObjects.Sprite {
             lifespan: 600, //milliseconds
         }); 
         emitterFlame.explode();
-        this.config.scene.sounds['explosion_short'].play();
+        this.config.scene.sounds['explosion_short'].play({'volume':this.config.scene.options.volume_explosions});
     }    
     _createBlastFX(){
         let emitterBlast = this.config.scene.add.particles('blastwave').createEmitter({
@@ -119,8 +119,8 @@ export default class Asteroid extends Phaser.GameObjects.Sprite {
         });
         emitterBlast.explode();
 
-        this.config.scene.sounds['sbabaam'].play();
-        this.config.scene.sounds['asteroid_explosion_1'].play();
+        this.config.scene.sounds['sbabaam'].play({'volume':this.config.scene.options.volume_explosions});
+        this.config.scene.sounds['asteroid_explosion_1'].play({'volume':this.config.scene.options.volume_explosions});
     }      
 
     toString() {
