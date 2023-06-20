@@ -1,15 +1,18 @@
 class BootScene extends Phaser.Scene {
+
     constructor(test) {
         super({
             key: 'BootScene'
         });
     }
+
     preload() {
         console.log('loading...');
         const progress = this.add.graphics();
         const text = this.add.text(
             this.sys.game.config.width / 2 - 50,
-            this.sys.game.config.height / 2 - 20, {
+            this.sys.game.config.height / 2 - 20, 
+            {
                 color: '#fff',
                 stroke: '#f00',
                 strokeThickness: 1,
@@ -40,6 +43,7 @@ class BootScene extends Phaser.Scene {
             text.destroy();
             console.log('load complete');
             this.scene.start('GameScene');
+            this.scene.start('ShipConfigScene');
         });
 
         // load stuff
@@ -54,10 +58,10 @@ class BootScene extends Phaser.Scene {
         this.load.image('blastwave', 'assets/blastwave1.png');
         this.load.image('flame', 'assets/muzzleflash7.png');
 
-        this.load.audio('laser_single',  ['sounds/laser_single.wav']);
-        this.load.audio('sbabaam',  ['sounds/sbabaam.wav']);
-        this.load.audio('explosion_short',  ['sounds/explosion_short.wav']);
-        this.load.audio('asteroid_explosion_1',  ['sounds/asteroid_explosion_1.wav']);
+        this.load.audio('laser_single', ['sounds/laser_single.wav']);
+        this.load.audio('sbabaam', ['sounds/sbabaam.wav']);
+        this.load.audio('explosion_short', ['sounds/explosion_short.wav']);
+        this.load.audio('asteroid_explosion_1', ['sounds/asteroid_explosion_1.wav']);
     }
 }
 

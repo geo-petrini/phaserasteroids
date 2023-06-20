@@ -3,7 +3,7 @@ import Bullet from '../sprites/bullet.js'
 import Asteroid from '../sprites/asteroid.js';
 
 import Options from './options.js';
-import Menu from './menu.js';
+//import Menu from './menu.js';
 import MiniMap from './minimap.js';
 import Radar from './radar.js';
 
@@ -20,17 +20,17 @@ class GameScene extends Phaser.Scene {
 
     preload() {
         this.canvas = this.sys.game.canvas;
-        this.load.scenePlugin({
-            key: 'rexuiplugin',
-            url: 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexuiplugin.min.js',
-            sceneKey: 'rexUI'
-        });
+        // this.load.scenePlugin({
+        //     key: 'rexuiplugin',
+        //     url: 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexuiplugin.min.js',
+        //     sceneKey: 'rexUI'
+        // });
     }
 
     create() {
         console.log('gamescene create');
 
-        let { game_width, game_height } = this.sys.game.canvas;
+        let { game_width, game_height } = this.canvas;
         this.game_width = game_width;
         this.game_height = game_height;
         this.WORLD_WIDTH = 8000;
@@ -347,19 +347,22 @@ class GameScene extends Phaser.Scene {
                 this.cameras.main.zoom = 1
             }
 
-
             if (this.input.keyboard.checkDown(this.toggleMenuKey, 250)) {
-                if (this.MENU_INITIALIZED == false) {
-                    this.menu = new Menu(this);
-                    this.MENU_INITIALIZED = true;
-                }
-
-                if (this.menu.isOpen()) {
-                    this.menu.close();
-                } else {
-                    this.menu.open();
-                }
+                this.input.stopPropagation();
+                this.scene.switch('ShipConfigScene');
             }
+            // if (this.input.keyboard.checkDown(this.toggleMenuKey, 250)) {
+            //     if (this.MENU_INITIALIZED == false) {
+            //         this.menu = new Menu(this);
+            //         this.MENU_INITIALIZED = true;
+            //     }
+
+            //     if (this.menu.isOpen()) {
+            //         this.menu.close();
+            //     } else {
+            //         this.menu.open();
+            //     }
+            // }
 
             this.radar.update();
 

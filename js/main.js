@@ -2,6 +2,7 @@
 //import "https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser-arcade-physics.min.js";
 import BootScene from './scenes/bootscene.js';
 import GameScene from './scenes/gamescene.js';
+import ShipConfigScene from './scenes/shipconfig.js';
 //import RexUIPlugin from './js/vendor/rexuiplugin.min.js';
 
 var SET_WIDTH=window.innerWidth;
@@ -23,7 +24,8 @@ const config = {
     },
     scene: [
         BootScene,
-        GameScene
+        GameScene,
+        ShipConfigScene
     ]
 };
 
