@@ -22,8 +22,7 @@ class ShipConfigScene extends Phaser.Scene {
         this.game_width = game_width;
         this.game_height = game_height;
         console.log(`game size ${this.game_width}:${this.game_height}`)
-        var ship = this.add.image(200, 200, 'space', 'ship').setOrigin(0);
-        ship.setScale(3)
+        var ship = this.add.image(200, 200, 'ship-big').setOrigin(0);
 
         this.scene.switch('GameScene');
         console.log('ship config ready');
