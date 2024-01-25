@@ -4,7 +4,7 @@ Better ship-asteroid collision
 - ship collision box to circle
 - add a shield hit animation
 - remove shield amount by asteroid size or velocity
-- when shield depleted destroy ship
+- when shield depleted destroy ship (PARTIAL)
 - split asteroid  
 - added healthbar with damage and regenerations
 - shake camera (DONE)
@@ -18,7 +18,7 @@ Particles
 
 Radar
 - implement a minimap/radar that shows the asteroids location (DONE)
-- fix stuttering (possible cause: camera bounds)
+- fix stuttering (possible cause: camera bounds, maybe use the text canvas)
 
 Screen
 - implement some kind of game boundaries (wall loop?)
@@ -38,8 +38,10 @@ Gameplay
     - more blasters
     - superweapon (seismic bomb/clear radius)
 
-Ship control
+Ship
 - add alternative controls from keyboard keys, eg touch control with https://yoannmoi.net/nipplejs/, https://rexrainbow.github.io/phaser3-rex-notes/docs/site/virtualjoystick/
+- improve healthbars follow mode
+- update healthbars with event (this.addListener())
 
 Effects
 - size explosion by asteroid size

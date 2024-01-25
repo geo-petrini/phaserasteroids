@@ -290,7 +290,8 @@ class GameScene extends Phaser.Scene {
             //let textY = this.scene.cameras.main.centerY - this.scene.cameras.main.height/2;
             //this.text.setPosition(textX, textY);
             //this.text.setPosition(this.ship.x+50, this.ship.y+50);
-            outstr += '\n' + 'Ship(x:' + this.ship.x.toFixed(2) + ', y:' + this.ship.y.toFixed(2) + ')';
+            // outstr += '\n' + 'Ship(x:' + this.ship.x.toFixed(2) + ', y:' + this.ship.y.toFixed(2) + ')';
+            outstr += '\n' + this.ship.toString()
         }
 
 

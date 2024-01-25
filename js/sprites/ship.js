@@ -159,6 +159,15 @@ export default class Ship extends Phaser.GameObjects.Sprite {
         }
     }
 
+    toString(){
+        let outstr = ""
+        outstr += 'Ship('
+        outstr += `center: {x: ${this.x.toFixed(2)} y: ${this.y.toFixed(2)} `
+        outstr += ', ' + `hull_hb: {x:${this.hull_hb.x}, y:${this.hull_hb.y}} `
+        outstr += ')'
+        return outstr
+    }
+
     update(keys, time, delta) {
         this._checkOptions()
         this._repositionHealthBars()
