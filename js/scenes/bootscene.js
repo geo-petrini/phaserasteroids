@@ -63,6 +63,8 @@ class BootScene extends Phaser.Scene {
         this.load.audio('sbabaam', ['sounds/sbabaam.wav']);
         this.load.audio('explosion_short', ['sounds/explosion_short.wav']);
         this.load.audio('asteroid_explosion_1', ['sounds/asteroid_explosion_1.wav']);
+        this.cameras.main.fadeOut(150);
+        //this.cameras.main.flash(50)
     }
 }
 

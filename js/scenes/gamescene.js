@@ -81,7 +81,7 @@ class GameScene extends Phaser.Scene {
 
         //PhaserGUIAction(this);  //takes a very long time to load when asteroids are created here, moved to update
         console.log('gamescene ready');
-        this.cameras.main.fadeIn(250);
+        //this.cameras.main.fadeIn(100);
     }
 
     createBackground() {
