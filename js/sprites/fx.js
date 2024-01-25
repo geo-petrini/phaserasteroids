@@ -75,4 +75,5 @@ export function createTrail(source, scene) {
         blendMode: 'ADD'
     });
     emitterTrail.startFollow(source);
+    return emitterTrail
 }

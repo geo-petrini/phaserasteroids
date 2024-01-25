@@ -54,7 +54,7 @@ export default class Ship extends Phaser.GameObjects.Sprite {
         //this.repairEvent = this.config.scene.time.addEvent({ delay: 1000, callback: this.repairHull, callbackScope: this, loop: true });
         //this.repairEvent = this.config.scene.time.addEvent({ delay: 1000, loop: true });
 
-        fx.createTrail(this, this.config.scene)
+        this.trail_emitter = fx.createTrail(this, this.config.scene)
         this.assignKeys();
         console.log(this);
     }
@@ -179,7 +179,10 @@ export default class Ship extends Phaser.GameObjects.Sprite {
             }
 
             if (keys.up.isDown || keys.alt_up.isDown) {
+                this.trail_emitter.startFollow(this)
                 this._accelerate();
+            } else {
+                this.trail_emitter.stopFollow()
             }
             if (keys.turbo.isDown && time > this.lastTurbo) {
                 this._accelerate(true);
