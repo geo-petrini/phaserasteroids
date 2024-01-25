@@ -10,8 +10,8 @@ class BootScene extends Phaser.Scene {
         console.log('loading...');
         const progress = this.add.graphics();
         const text = this.add.text(
-            this.sys.game.config.width / 2 - 50,
-            this.sys.game.config.height / 2 - 20, 
+            this.sys.game.scale.width /2 - 50,
+            this.sys.game.scale.height /2 - 50,
             {
                 color: '#fff',
                 stroke: '#f00',
@@ -32,7 +32,7 @@ class BootScene extends Phaser.Scene {
         this.load.on('progress', (value) => {
             progress.clear();
             progress.fillStyle(0xffffff, 1);
-            progress.fillRect(0, this.sys.game.config.height / 2, this.sys.game.config.width * value, 20);
+            progress.fillRect(0, this.sys.game.scale.height / 2, this.sys.game.scale.width * value, 20);
             text.setText('<< LOADING >>')
         });
 

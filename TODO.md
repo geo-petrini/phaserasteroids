@@ -22,8 +22,8 @@ Radar
 
 Screen
 - implement some kind of game boundaries (wall loop?)
-- resize game screen to fill page (DONE)
-- dynamically resize game screen (DONE)
+- resize game screen to fill page (RE-DONE)
+- dynamically resize game screen (RE-DONE)
 
 Gameplay
 - make asteroids more dangerous (faster by size)
@@ -46,7 +46,7 @@ Effects
 - change blaster origin (currently it starts from ship center and is visible when firing) (FIXED BY SHIP DEPTH-LEVEL)
 - change ship trail 
     - current origin from ship center and visible over ship (FIXED BY SHIP DEPTH-LEVEL)
-    - trail keeps firing even when thrusters are not active
+    - trail keeps firing even when thrusters are not active (SOLVED)
 
 Sounds
 - add sounds for everything (ship, blaster, explosions)
