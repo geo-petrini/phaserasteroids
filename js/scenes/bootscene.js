@@ -50,10 +50,10 @@ class BootScene extends Phaser.Scene {
         this.load.image('background', 'assets/nebula.jpg');
         this.load.image('stars', 'assets/stars.png');
         this.load.atlas('space', 'assets/space.png', 'assets/space.json');
-        this.load.image('asteroid1', 'assets/asteroid1.png');
-        this.load.image('asteroid2', 'assets/asteroid2.png');
-        this.load.image('asteroid3', 'assets/asteroid3.png');
-        this.load.image('asteroid4', 'assets/asteroid4.png');
+        // this.load.image('asteroid1', 'assets/asteroid1.png');
+        // this.load.image('asteroid2', 'assets/asteroid2.png');
+        // this.load.image('asteroid3', 'assets/asteroid3.png');
+        // this.load.image('asteroid4', 'assets/asteroid4.png');
         this.load.image('smoke', 'assets/smoke.png');
         this.load.image('blastwave', 'assets/blastwave1.png');
         this.load.image('flame', 'assets/muzzleflash7.png');

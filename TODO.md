@@ -1,5 +1,8 @@
 TODO
 
+Textures
+- handle asteroids spritesheets: either from single file or from atlas
+
 Better ship-asteroid collision
 - ship collision box to circle
 - add a shield hit animation

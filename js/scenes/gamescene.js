@@ -139,6 +139,7 @@ class GameScene extends Phaser.Scene {
 
         this.cameras.main.startFollow(this.ship);
 
+        // TODO move to ship
         this.bullets = this.physics.add.group({
             classType: Bullet,
             maxSize: 30,

@@ -11,7 +11,7 @@ export function createSmokeFX(x, y, scene) {
     //     active: true,
     //     lifespan: 600, //milliseconds
     // });
-    let emitterSmoke = scene.add.particles(x, y, 'smoke',{
+    let emitterSmoke = scene.add.particles(x, y, 'smoke', {
         speed: { min: 1, max: 10 },
         angle: { min: 0, max: 270 },
         scale: { start: 0.5, end: 0 },
@@ -19,7 +19,7 @@ export function createSmokeFX(x, y, scene) {
         blendMode: 'SCREEN',
         active: true,
         lifespan: 600, //milliseconds
-    });    
+    });
     emitterSmoke.explode();
 }
 
@@ -43,7 +43,7 @@ export function createFlameFX(x, y, scene) {
         blendMode: 'SCREEN',
         active: true,
         lifespan: 600, //milliseconds
-    });    
+    });
     emitterFlame.explode();
     scene.sounds['explosion_short'].play();
 }
@@ -68,7 +68,7 @@ export function createBlastFX(x, y, scene) {
         blendMode: 'SCREEN',
         active: true,
         lifespan: 600, //milliseconds
-    });    
+    });
     emitterBlast.explode();
 
     scene.sounds['sbabaam'].play();
@@ -101,8 +101,33 @@ export function createTrail(source, scene) {
     //     scale: { start: 0.2, end: 0 },
     //     blendMode: 'ADD'
     // });
-    var emitterTrail = scene.add.particles( source.x, source.y, 'space',
-        {
+    //using config
+    // let emitterConfig = {
+    //     frame: 'blue',
+    //     speed: 100,
+    //     lifespan: {
+    //         onEmit: function (particle, key, t, value) {
+    //             return Phaser.Math.Percent(source.body.speed, 0, 300) * 500;
+    //         }
+    //     },
+    //     alpha: {
+    //         onEmit: function (particle, key, t, value) {
+    //             return Phaser.Math.Percent(source.body.speed, 0, 300);
+    //         }
+    //     },
+    //     angle: {
+    //         onEmit: function (particle, key, t, value) {
+    //             var v = Phaser.Math.Between(-10, 10);
+    //             return (source.angle - 180) + v;
+    //         }
+    //     },
+    //     scale: { start: 0.2, end: 0 },
+    //     blendMode: 'ADD',
+    //     follow: source
+    //     // TODO add folllowOffset
+    // }
+    // var emitterTrail = scene.add.particles(source.x, source.y, 'space', emitterConfig);
+    var emitterTrail = scene.add.particles(source.x, source.y, 'space', {
         frame: 'blue',
         speed: 100,
         lifespan: {
@@ -123,7 +148,9 @@ export function createTrail(source, scene) {
         },
         scale: { start: 0.2, end: 0 },
         blendMode: 'ADD'
-    });    
+    }
+    );
+    // TODO fix this, as it currently does not follo the position, also check in ship.update()
     emitterTrail.startFollow(source);
     return emitterTrail
 }

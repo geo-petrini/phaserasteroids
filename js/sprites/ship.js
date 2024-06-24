@@ -188,8 +188,9 @@ export default class Ship extends Phaser.GameObjects.Sprite {
             }
 
             if (keys.up.isDown || keys.alt_up.isDown) {
-                this.trail_emitter.startFollow(this)
+                this.trail_emitter.startFollow(this.body)
                 this._accelerate();
+                // this.trail_emitter.start()
             } else {
                 this.trail_emitter.stopFollow()
             }
