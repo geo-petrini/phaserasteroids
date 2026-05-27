@@ -67,8 +67,8 @@ export default class Ship extends Phaser.GameObjects.Sprite {
     explode() {
         this.status = 'destroyed'
         this.hull_hb.visible = false;
-        this.weapons_hb.visible = false;
-        this.turbo_hb.visible = false;
+        this.energy_hb.visible = false;
+        this.shield_hb.visible = false;
         this.visible = false;
         fx.createSmokeFX(this.x, this.y, this.config.scene);
         fx.createFlameFX(this.x, this.y, this.config.scene);
@@ -89,9 +89,9 @@ export default class Ship extends Phaser.GameObjects.Sprite {
         }
     }
 
-    _rechargeWeapons() {
-        if (this.weapons_hb.value < 100) {
-            this.weapons_hb.increase(this.WEAPONS_RECHARGE_AMOUNT)
+    _rechargeEnergy() {
+        if (this.energy_hb.value < 100) {
+            this.energy_hb.increase(this.WEAPONS_RECHARGE_AMOUNT)
         }
     }
 
@@ -106,13 +106,13 @@ export default class Ship extends Phaser.GameObjects.Sprite {
         this.hull_hb.y = shipScreenY + this.body.height
         this.hull_hb.draw()
 
-        this.weapons_hb.x = shipScreenX - this.body.width / 2
-        this.weapons_hb.y = shipScreenY + this.body.height + v_offset
-        this.weapons_hb.draw()
+        this.energy_hb.x = shipScreenX - this.body.width / 2
+        this.energy_hb.y = shipScreenY + this.body.height + v_offset
+        this.energy_hb.draw()
 
-        this.turbo_hb.x = shipScreenX - this.body.width / 2
-        this.turbo_hb.y = shipScreenY + this.body.height + v_offset * 2
-        this.turbo_hb.draw()
+        this.shield_hb.x = shipScreenX - this.body.width / 2
+        this.shield_hb.y = shipScreenY + this.body.height + v_offset * 2
+        this.shield_hb.draw()
     }
 
     _rotate(direction) {
@@ -138,7 +138,7 @@ export default class Ship extends Phaser.GameObjects.Sprite {
     }
 
     _fire(time) {
-        if (this.weapons_hb.value > this.WEAPONS_BULLET_DISCHARGE_AMOUNT) {
+        if (this.energy_hb.value > this.WEAPONS_BULLET_DISCHARGE_AMOUNT) {
             var bullet = this.bullets.get();
 
             if (bullet) {
@@ -146,7 +146,7 @@ export default class Ship extends Phaser.GameObjects.Sprite {
                 bullet.setDepth(this.depth - 1);
                 this.lastFired = time + this.FIRE_INTERVALL;
                 this.config.scene.sounds['laser'].play({ 'volume': this.config.scene.options.volume_bullets });
-                this.weapons_hb.decrease(1)
+                this.energy_hb.decrease(1)
             }
         }
     }
@@ -201,7 +201,7 @@ export default class Ship extends Phaser.GameObjects.Sprite {
                 this.lastRepaired = time + this.HULL_REPAIR_INTERVALL;
             }
             if (time > this.lastWeaponsRecharge) {
-                this._rechargeWeapons()
+                this._rechargeEnergy()
                 this.lastWeaponsRecharge = time + this.WEAPONS_RECHARGE_INTERVALL;
             }
 
