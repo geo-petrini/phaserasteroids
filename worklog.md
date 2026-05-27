@@ -58,15 +58,18 @@ Dipendenze: Phaser CDN, rexUI plugin (inutilizzato), dat.GUI (inutilizzato)
 - Stessa logica, pattern moderno ES6
 
 ### `js/sprites/ship.js`
+- Aggiunto `this.setAlpha(0.8)` — ship semi-trasparente
 - `_repositionHealthBars()`: coordinate schermo usando `cam.width/2, cam.height/2` invece di `this.x - cam.scrollX` (elimina lag da camera scroll)
-- Trail emitter: confermato pattern `startFollow/stopFollow` nell'update (non usare `emitting`)
+- Trail emitter: `startFollow(this) + emitting = true` quando accelera, `stopFollow() + emitting = false` quando no
 
 ### `js/sprites/asteroid.js`
 - `body.setCircle(Math.max(this.width, ...))` → `body.setCircle(Math.max(this.displayWidth, ...))`
 - Rimosso `body.updateBounds()` (superfluo)
 
 ### `js/sprites/fx.js`
-- `createTrail`: mantiene `emitterTrail.startFollow(source)` dopo la creazione
+- `createTrail`: emitter creato a (0,0) con `emitting: false` (nessun follow nel config)
+- In Phaser 4 il config `follow: source` non accetta un game object (solo Vector2Like)
+- `startFollow(target)` nell'update della ship imposta il seguimento ogni frame
 
 ### `js/sprites/healthbar.js` — REWRITE
 - Rimosso bug `this.danger_value =` (dangling assignment)
@@ -78,22 +81,6 @@ Dipendenze: Phaser CDN, rexUI plugin (inutilizzato), dat.GUI (inutilizzato)
 
 ### `js/utils/helpers.js` — NUOVO
 - `parseColor(hex)`: se > 0xFFFFFF assume formato `0xRRGGBBAA`, separa RGB e alpha (0-1)
-
-### `js/scenes/radar.js` — REWRITE
-- **Causa stutter**: `Graphics` senza `setScrollFactor(0)`, calcoli in coordinate mondo
-- **Fix**: `this.g.setScrollFactor(0)` + coordinate schermo relative al centro camera
-- Algoritmo: slab method per ray-rectangle intersection
-- Skip asteroidi già visibili a schermo
-
-### `js/scenes/minimap.js` — REWRITE
-- **Causa stutter**: Estensione di `Camera` con scroll manuale
-- **Fix**: Graphics overlay con `setScrollFactor(0)`, mapping lineare mondo→schermo
-- Angolo alto-destra, 160×160px, sfondo blu scuro
-- Asteroidi: punti rossi, Nave: punto verde
-
-### `js/scenes/options.js`
-- Aggiunto `camera_zoom_levels = [1, 0.5, 0.2, 3, 2]`
-- Camera zoom cicla tra questi livelli con tasto M
 
 ## Note su Phaser 4
 

@@ -16,11 +16,12 @@ export default class Ship extends Phaser.GameObjects.Sprite {
         this.type = 'ship';
         this.name = 'playerShip';
         this.status = 'active';
+        // this.setAlpha(0.3);
 
-        this.ROTATION = 100
+        this.ROTATION = 180
         this.ACCELERATION = 40
         this.TURBO_ACCELERATION_INCREMENT = 5
-        this.FIRE_INTERVALL = 5;
+        this.FIRE_INTERVALL = 15;
         this.HULL_REPAIR_INTERVALL = 10;
         this.HULL_REPAIR_AMOUNT = 0.001;
         this.WEAPONS_RECHARGE_INTERVALL = 10;
@@ -177,9 +178,11 @@ export default class Ship extends Phaser.GameObjects.Sprite {
 
             if (keys.up.isDown || keys.alt_up.isDown) {
                 this.trail_emitter.startFollow(this)
+                this.trail_emitter.emitting = true
                 this._accelerate();
             } else {
                 this.trail_emitter.stopFollow()
+                this.trail_emitter.emitting = false
             }
             if (keys.turbo.isDown && time > this.lastTurbo) {
                 this._accelerate(true);

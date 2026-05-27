@@ -44,10 +44,11 @@ export function createBlastFX(x, y, scene) {
 
 
 export function createTrail(source, scene) {
-    var emitterTrail = scene.add.particles(source.x, source.y, 'space',
+    var emitterTrail = scene.add.particles(0, 0, 'space',
         {
             frame: 'blue',
             speed: 100,
+            emitting: false,
             lifespan: {
                 onEmit: function (particle, key, t, value) {
                     return Phaser.Math.Percent(source.body.speed, 0, 300) * 500;
@@ -67,6 +68,5 @@ export function createTrail(source, scene) {
             scale: { start: 0.2, end: 0 },
             blendMode: 'ADD'
         });
-    emitterTrail.startFollow(source);
     return emitterTrail
 }
