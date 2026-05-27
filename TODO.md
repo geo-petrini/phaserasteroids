@@ -60,6 +60,28 @@ UI
 - in-game gui (in progress)
 - debugger console
 
+SHIP EDITOR
+- editor grid 9x9
+- elements:
+  - cabin (1x2)
+  - generator
+    - level 1: 1x1
+    - level 2: 1x2
+    - level 3: 1x3
+  - thrusters
+    - level 1: 1x1
+    - level 2: 1x2
+    - level 3: 1x3
+  - shields
+    - level 1: 1x1
+    - level 2: 1x2
+    - level 3: 1x3
+  - weapons
+    - gun level 1: 1x1
+    - gun (tracking) level 1: 2x1
+  - drag and drop
+  
+
 links
 https://phaserplugins.com/
 https://jsfehler.github.io/phaser-ui-tools/

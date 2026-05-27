@@ -82,6 +82,19 @@ Dipendenze: Phaser CDN, rexUI plugin (inutilizzato), dat.GUI (inutilizzato)
 ### `js/utils/helpers.js` — NUOVO
 - `parseColor(hex)`: se > 0xFFFFFF assume formato `0xRRGGBBAA`, separa RGB e alpha (0-1)
 
+### `js/sprites/shipeditor.js` — NUOVO
+- Griglia 9×9 con celle da 48px
+- Palette elementi (Cabin, Generator L1-3, Thruster L1-3, Shield L1-3, Gun L1, Track Gun)
+- Drag & drop dalla palette alla griglia con ghost snapping
+- Elementi piazzati ri-draggabili per riposizionamento
+- Click destro per rimuovere elemento
+- Ogni elemento ha colore e dimensione diversa (quadrati colorati, nessuna sprite)
+
+### `js/scenes/shipconfig.js` — REWRITE
+- Integrato ShipEditor come scena principale
+- Tasto O per alternare tra editor e GameScene (`scene.switch`)
+- Sfondo scuro #0a0a1a
+
 ## Note su Phaser 4
 
 - `Phaser.Input.Keyboard.JustDown(key)` → se non funziona, usare `key.justDown`
