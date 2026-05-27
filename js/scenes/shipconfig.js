@@ -17,9 +17,9 @@ class ShipConfigScene extends Phaser.Scene {
             fontSize: '16px', color: '#8888ff',
         })
 
-        this.add.text(580, 30, 'ELEMENTS', {
-            fontSize: '16px', color: '#8888ff',
-        })
+        // this.add.text(580, 30, 'ELEMENTS', {
+        //     fontSize: '16px', color: '#8888ff',
+        // })
 
         this.toggleKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.O)
 
@@ -29,6 +29,12 @@ class ShipConfigScene extends Phaser.Scene {
     update(time, delta) {
         if (this.input.keyboard.checkDown(this.toggleKey, 250)) {
             this.input.stopPropagation()
+            const shipData = this.registry.get('shipData')
+            if (shipData) {
+                const gs = this.scene.get('GameScene')
+                gs._pendingCustomShip = shipData
+                gs._pendingShipVersion = this.registry.get('shipDataVersion') || 0
+            }
             this.scene.switch('GameScene')
         }
     }

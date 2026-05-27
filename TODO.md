@@ -69,22 +69,36 @@ SHIP EDITOR
     - connector M 2x2
     - connector L 3x3
   - generator
-    - level 1: 1x1
-    - level 2: 1x2
-    - level 3: 1x3
+    - level 1: 1x1, energy generation: 2pt / 1 second
+    - level 2: 1x2, energy generation: 5pt / 1 second
+    - level 3: 1x3, energy generation: 8pt / 1 second
   - thrusters
-    - level 1: 1x1
-    - level 2: 1x2
-    - level 3: 1x3
+    - forward level 1: 1x1, accelleration: 20, particle color: red
+    - forward level 2: 1x2, accelleration: 55, particle color: yellow
+    - forward level 3: 1x3, accelleration: 70, particle color: blue
+    - lateral level 1: rotation: 20, particle color: red
+    - lateral level 2: rotation: 55, particle color: yellow
   - shields
-    - level 1: 1x1
-    - level 2: 1x2
-    - level 3: 1x3
+    - generator level 1: 1x1, recharge: 1pt / 2 second
+    - generator level 2: 2x2, recharge: 2pt / 3 second
+    - generator level 3: 2x3, recharge: 4pt / 2 second
+    - capacitor level 1: 1x1, charge: 40 pt 
+    - capacitor level 1: 2x1, charge: 90 pt 
+    - capacitor level 1: 3x2, charge: 150 pt 
   - weapons
     - gun level 1: 1x1
     - gun (tracking) level 1: 2x1
   - drag and drop
-  
+
+CUSTOM SHIP
+- ship is created via ship editor
+- rules:
+  - only 1 cabin
+  - min 1 generator
+  - min 1 thruster
+- each thruster adds to total ship accelleration or lateral movement (depending on type)
+- each shield adds to shield generation for shield_hb
+- each generator adds to energy_hb
 
 
 links

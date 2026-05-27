@@ -1,43 +1,48 @@
 const CELL = 48
 const GAP = 2
-const COLS = 9
-const ROWS = 9
+const COLS = 13
+const ROWS = 13
 const GRID_X = 60
 const GRID_Y = 60
-const PALETTE_X = 580
+const PALETTE_X = GRID_X + (COLS + 1) * CELL + (COLS + 1) * GAP
 
 const CATEGORIES = [
   {
     name: 'HULL', color: 0xf0d060,
     items: [
-      { id: 'cabin',      label: 'Cabin',       w: 1, h: 2 },
-      { id: 'connector_s',label: 'Connector S', w: 1, h: 1 },
-      { id: 'connector_m',label: 'Connector M', w: 2, h: 2 },
-      { id: 'connector_l',label: 'Connector L', w: 3, h: 3 },
+      { id: 'cabin',       label: 'Cabin',        w: 1, h: 2 },
+      { id: 'connector_s', label: 'Connector S',  w: 1, h: 1 },
+      { id: 'connector_m', label: 'Connector M',  w: 2, h: 2 },
+      { id: 'connector_l', label: 'Connector L',  w: 3, h: 3 },
     ],
   },
   {
     name: 'GENERATOR', color: 0x4488ff,
     items: [
-      { id: 'gen1', label: 'Gen L1', w: 1, h: 1 },
-      { id: 'gen2', label: 'Gen L2', w: 1, h: 2 },
-      { id: 'gen3', label: 'Gen L3', w: 1, h: 3 },
+      { id: 'gen1', label: 'Gen L1', w: 1, h: 1, energyGen: 2 },
+      { id: 'gen2', label: 'Gen L2', w: 1, h: 2, energyGen: 5 },
+      { id: 'gen3', label: 'Gen L3', w: 1, h: 3, energyGen: 8 },
     ],
   },
   {
     name: 'THRUSTERS', color: 0xff6644,
     items: [
-      { id: 'thrust1', label: 'Thrust L1', w: 1, h: 1 },
-      { id: 'thrust2', label: 'Thrust L2', w: 1, h: 2 },
-      { id: 'thrust3', label: 'Thrust L3', w: 1, h: 3 },
+      { id: 'thrust_f1', label: 'Fwd L1', w: 1, h: 1, accel: 20,  particleColor: 0xff4444 },
+      { id: 'thrust_f2', label: 'Fwd L2', w: 1, h: 2, accel: 55,  particleColor: 0xffff44 },
+      { id: 'thrust_f3', label: 'Fwd L3', w: 1, h: 3, accel: 70,  particleColor: 0x4488ff },
+      { id: 'thrust_l1', label: 'Lat L1', w: 1, h: 1, rotation: 20, particleColor: 0xff4444 },
+      { id: 'thrust_l2', label: 'Lat L2', w: 1, h: 1, rotation: 55, particleColor: 0xffff44 },
     ],
   },
   {
     name: 'SHIELDS', color: 0x44ffcc,
     items: [
-      { id: 'shield1', label: 'Shield L1', w: 1, h: 1 },
-      { id: 'shield2', label: 'Shield L2', w: 1, h: 2 },
-      { id: 'shield3', label: 'Shield L3', w: 1, h: 3 },
+      { id: 'shield_gen1', label: 'Gen L1', w: 1, h: 1, recharge: 0.5 },
+      { id: 'shield_gen2', label: 'Gen L2', w: 2, h: 2, recharge: 0.67 },
+      { id: 'shield_gen3', label: 'Gen L3', w: 2, h: 3, recharge: 2 },
+      { id: 'shield_cap1', label: 'Cap L1', w: 1, h: 1, capacity: 40 },
+      { id: 'shield_cap2', label: 'Cap L2', w: 2, h: 1, capacity: 90 },
+      { id: 'shield_cap3', label: 'Cap L3', w: 3, h: 2, capacity: 150 },
     ],
   },
   {
@@ -57,13 +62,15 @@ export default class ShipEditor {
     this.dragging = null
     this.currentPage = 0
     this.paletteGroup = []
+    this.tabGroup = []
+    this.shipBuilt = false
 
     this.bg = scene.add.graphics()
     this.paletteBg = scene.add.graphics()
-    this.navGroup = []
     this.drawGrid()
-    this.createNavButtons()
+    this.createTabs()
     this.drawPalettePage()
+    this.createBuildButton()
   }
 
   cellToPixel(col, row) {
@@ -77,6 +84,11 @@ export default class ShipEditor {
     const col = Math.round((px - GRID_X - GAP) / (CELL + GAP))
     const row = Math.round((py - GRID_Y - GAP) / (CELL + GAP))
     return { col, row }
+  }
+
+  onGrid(px, py) {
+    return px >= GRID_X && px < GRID_X + COLS * (CELL + GAP) + GAP &&
+           py >= GRID_Y && py < GRID_Y + ROWS * (CELL + GAP) + GAP
   }
 
   canPlace(el, col, row, ignoreEntry) {
@@ -98,39 +110,52 @@ export default class ShipEditor {
     const pos = this.cellToPixel(col, row)
     const w = el.w * (CELL + GAP) - GAP
     const h = el.h * (CELL + GAP) - GAP
-    const rect = this.scene.add.rectangle(pos.x + w / 2, pos.y + h / 2, w, h, el.color)
-    rect.setInteractive({ draggable: true })
-    const label = this.scene.add.text(pos.x + w / 2, pos.y + h / 2, el.label, {
+
+    const container = this.scene.add.container(pos.x + w / 2, pos.y + h / 2)
+
+    const bg = this.scene.add.rectangle(0, 0, w, h, el.color)
+    const label = this.scene.add.text(0, 0, el.label, {
       fontSize: '9px', color: '#000',
     }).setOrigin(0.5)
 
-    const entry = { rect, label, el, col, row }
+    container.add([bg, label])
+    container.setSize(w, h)
+    container.setInteractive({ draggable: true })
+
+    const entry = { container, bg, label, el, col, row, w, h }
     this.gridEntries.push(entry)
 
-    rect.on('drag', (pointer, dragX, dragY) => {
-      rect.x = dragX
-      rect.y = dragY
-      label.x = dragX
-      label.y = dragY
+    let ghost = null
+
+    container.on('dragstart', () => {
+      ghost = this.scene.add.rectangle(container.x, container.y, w, h, el.color, 0.5)
+      container.setAlpha(0.3)
     })
 
-    rect.on('dragend', () => {
-      const { col: newCol, row: newRow } = this.pixelToCell(rect.x, rect.y)
-      if (this.canPlace(el, newCol, newRow, entry)) {
+    container.on('drag', (pointer) => {
+      if (!ghost) return
+      const col = Math.round((pointer.x - GRID_X - GAP) / (CELL + GAP))
+      const row = Math.round((pointer.y - GRID_Y - GAP) / (CELL + GAP))
+      ghost.x = GRID_X + GAP + col * (CELL + GAP) + (el.w * (CELL + GAP) - GAP) / 2
+      ghost.y = GRID_Y + GAP + row * (CELL + GAP) + (el.h * (CELL + GAP) - GAP) / 2
+    })
+
+    container.on('dragend', (pointer) => {
+      if (!ghost) return
+      ghost.destroy()
+      container.setAlpha(1)
+
+      const { col: newCol, row: newRow } = this.pixelToCell(pointer.x, pointer.y)
+
+      if (!this.onGrid(pointer.x, pointer.y)) {
+        this.removeEntry(entry)
+      } else if (this.canPlace(el, newCol, newRow, entry)) {
         this.removeEntry(entry)
         this.place(el, newCol, newRow)
       } else {
-        const pos = this.cellToPixel(col, row)
-        rect.x = pos.x + w / 2
-        rect.y = pos.y + h / 2
-        label.x = pos.x + w / 2
-        label.y = pos.y + h / 2
-      }
-    })
-
-    rect.on('pointerdown', (pointer) => {
-      if (pointer.rightButtonDown()) {
-        this.removeEntry(entry)
+        const snap = this.cellToPixel(col, row)
+        container.x = snap.x + w / 2
+        container.y = snap.y + h / 2
       }
     })
   }
@@ -141,8 +166,7 @@ export default class ShipEditor {
         this.grid[r][c] = null
       }
     }
-    entry.rect.destroy()
-    entry.label.destroy()
+    entry.container.destroy()
     this.gridEntries = this.gridEntries.filter(e => e !== entry)
   }
 
@@ -175,7 +199,7 @@ export default class ShipEditor {
     this.clearPalettePage()
 
     const cat = CATEGORIES[this.currentPage]
-    const PAGE_Y = GRID_Y
+    const PAGE_Y = GRID_Y + 30
 
     this.paletteBg.fillStyle(0x0a0a1a, 1)
     this.paletteBg.fillRect(PALETTE_X - 10, PAGE_Y - 10, 200,
@@ -195,12 +219,10 @@ export default class ShipEditor {
       const cy = y + h / 2
 
       const rect = this.scene.add.rectangle(cx, cy, w, h, el.color)
+      rect.setInteractive({ draggable: true })
       const label = this.scene.add.text(cx, cy, el.label, {
         fontSize: '10px', color: '#000',
       }).setOrigin(0.5)
-
-      rect.setInteractive({ draggable: true })
-      rect.elementData = el
 
       rect.on('dragstart', () => {
         this.dragging = {
@@ -243,48 +265,142 @@ export default class ShipEditor {
     return h
   }
 
-  createNavButtons() {
-    const navY = GRID_Y + ROWS * (CELL + GAP) + GAP + 30
+  createTabs() {
+    const tabW = 36
+    const tabH = 22
+    const gap = 4
+    let x = PALETTE_X
 
-    this.scene.add.text(PALETTE_X, navY, 'Page:', {
-      fontSize: '12px', color: '#8888ff',
+    for (let i = 0; i < CATEGORIES.length; i++) {
+      const bg = this.scene.add.rectangle(x, GRID_Y - tabH / 2, tabW, tabH, 0x333355)
+      const label = this.scene.add.text(x, GRID_Y - tabH / 2, CATEGORIES[i].name.charAt(0), {
+        fontSize: '11px', color: '#aaa',
+      }).setOrigin(0.5)
+      bg.setInteractive({ useHandCursor: true })
+      bg.on('pointerdown', () => this.switchPage(i))
+
+      this.tabGroup.push({ bg, label, index: i })
+      x += tabW + gap
+    }
+
+    this.highlightTab()
+  }
+
+  highlightTab() {
+    for (const tab of this.tabGroup) {
+      tab.bg.setFillStyle(tab.index === this.currentPage ? 0x5555aa : 0x333355)
+      tab.label.setColor(tab.index === this.currentPage ? '#fff' : '#aaa')
+    }
+  }
+
+  switchPage(index) {
+    this.currentPage = index
+    this.drawPalettePage()
+    this.highlightTab()
+  }
+
+  createBuildButton() {
+    const bx = PALETTE_X
+    const by = GRID_Y + ROWS * (CELL + GAP) + GAP + 40
+
+    const btn = this.scene.add.rectangle(bx + 50, by, 100, 30, 0x44aa44)
+    btn.setInteractive({ useHandCursor: true })
+    const lbl = this.scene.add.text(bx + 50, by, 'BUILD SHIP', {
+      fontSize: '12px', color: '#fff',
+    }).setOrigin(0.5)
+
+    btn.on('pointerdown', () => this.buildShip())
+
+    this.buildBtn = { btn, lbl }
+  }
+
+  validate() {
+    const cabins = this.gridEntries.filter(e => e.el.id === 'cabin')
+    const gens = this.gridEntries.filter(e => e.el.id.startsWith('gen'))
+    const fwdThrust = this.gridEntries.filter(e => e.el.id.startsWith('thrust_f'))
+    const latThrust = this.gridEntries.filter(e => e.el.id.startsWith('thrust_l'))
+    const totalThrust = fwdThrust.length + latThrust.length
+
+    if (cabins.length !== 1) return 'Need exactly 1 cabin'
+    if (gens.length < 1) return 'Need at least 1 generator'
+    if (totalThrust < 1) return 'Need at least 1 thruster'
+    return null
+  }
+
+  computeBounds() {
+    let minCol = COLS, minRow = ROWS, maxCol = 0, maxRow = 0
+    for (const e of this.gridEntries) {
+      if (e.col < minCol) minCol = e.col
+      if (e.row < minRow) minRow = e.row
+      if (e.col + e.el.w > maxCol) maxCol = e.col + e.el.w
+      if (e.row + e.el.h > maxRow) maxRow = e.row + e.el.h
+    }
+    return { minCol, minRow, maxCol, maxRow }
+  }
+
+  buildShip() {
+    const error = this.validate()
+    if (error) {
+      this.showMessage(error, 0xff4444)
+      return
+    }
+
+    const { minCol, minRow, maxCol, maxRow } = this.computeBounds()
+    const shipW = (maxCol - minCol) * (CELL + GAP) + GAP
+    const shipH = (maxRow - minRow) * (CELL + GAP) + GAP
+
+    const g = this.scene.add.graphics()
+    for (const e of this.gridEntries) {
+      const x = (e.col - minCol) * (CELL + GAP) + GAP
+      const y = (e.row - minRow) * (CELL + GAP) + GAP
+      const w = e.el.w * (CELL + GAP) - GAP
+      const h = e.el.h * (CELL + GAP) - GAP
+      g.fillStyle(e.el.color, 1)
+      g.fillRect(x, y, w, h)
+    }
+
+    const texKey = 'custom_ship_' + Date.now()
+    g.generateTexture(texKey, shipW, shipH)
+    g.destroy()
+
+    const stats = this.computeStats()
+    stats.textureKey = texKey
+
+    this.scene.registry.set('shipData', stats)
+    this.scene.registry.set('shipDataVersion', (this.scene.registry.get('shipDataVersion') || 0) + 1)
+    this.shipBuilt = true
+    this.showMessage('Ship built! Press O to play', 0x44ff44)
+  }
+
+  computeStats() {
+    let accel = 0, rotation = 0, energyGen = 0
+    let shieldRecharge = 0, shieldCapacity = 0
+    const thrustParticleColors = []
+
+    for (const e of this.gridEntries) {
+      const el = e.el
+      if (el.accel) {
+        accel += el.accel
+        thrustParticleColors.push(el.particleColor)
+      }
+      if (el.rotation) rotation += el.rotation
+      if (el.energyGen) energyGen += el.energyGen
+      if (el.recharge) shieldRecharge += el.recharge
+      if (el.capacity) shieldCapacity += el.capacity
+    }
+
+    return { accel, rotation, energyGen, shieldRecharge, shieldCapacity, thrustParticleColors }
+  }
+
+  showMessage(text, color) {
+    if (this.msgText) this.msgText.destroy()
+    const bx = PALETTE_X + 50
+    const by = GRID_Y + ROWS * (CELL + GAP) + GAP + 80
+    this.msgText = this.scene.add.text(bx, by, text, {
+      fontSize: '11px', color: '#' + color.toString(16).padStart(6, '0'),
+    }).setOrigin(0.5)
+    this.scene.time.delayedCall(3000, () => {
+      if (this.msgText) { this.msgText.destroy(); this.msgText = null }
     })
-
-    const prevBg = this.scene.add.rectangle(PALETTE_X + 50, navY + 8, 30, 20, 0x444466)
-    prevBg.setInteractive({ useHandCursor: true })
-    const prevLabel = this.scene.add.text(PALETTE_X + 50, navY + 8, '\u25C0', {
-      fontSize: '12px', color: '#fff',
-    }).setOrigin(0.5)
-    prevBg.on('pointerdown', () => this.prevPage())
-
-    this.pageText = this.scene.add.text(PALETTE_X + 90, navY + 8, '', {
-      fontSize: '12px', color: '#fff',
-    }).setOrigin(0.5)
-
-    const nextBg = this.scene.add.rectangle(PALETTE_X + 130, navY + 8, 30, 20, 0x444466)
-    nextBg.setInteractive({ useHandCursor: true })
-    const nextLabel = this.scene.add.text(PALETTE_X + 130, navY + 8, '\u25B6', {
-      fontSize: '12px', color: '#fff',
-    }).setOrigin(0.5)
-    nextBg.on('pointerdown', () => this.nextPage())
-
-    this.navGroup.push(prevBg, prevLabel, nextBg, nextLabel, this.pageText)
-    this.updatePageText()
-  }
-
-  updatePageText() {
-    this.pageText.setText(`${this.currentPage + 1}/${CATEGORIES.length}`)
-  }
-
-  prevPage() {
-    this.currentPage = (this.currentPage - 1 + CATEGORIES.length) % CATEGORIES.length
-    this.drawPalettePage()
-    this.updatePageText()
-  }
-
-  nextPage() {
-    this.currentPage = (this.currentPage + 1) % CATEGORIES.length
-    this.drawPalettePage()
-    this.updatePageText()
   }
 }

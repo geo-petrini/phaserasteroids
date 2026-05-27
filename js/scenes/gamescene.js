@@ -30,10 +30,14 @@ class GameScene extends Phaser.Scene {
         this.ASTEROIDS_INITIALIZED = false;
         this.MENU_INITIALIZED = false;
         this.cameraZoomIndex = 0;
+        this._appliedShipVersion = 0;
 
         this.createBackground();
         this.createKeys();
-        this.createShip();
+
+        const shipData = this.registry.get('shipData')
+        this.createShip(shipData || {})
+
         this.createSounds();
 
         this.ui_container = this.add.container()
@@ -44,6 +48,9 @@ class GameScene extends Phaser.Scene {
         this.minimap = new MiniMap(this);
 
         this.ui_container.add(this.text)
+
+        this._pendingCustomShip = null
+        this._pendingShipVersion = 0
 
         console.log('gamescene ready');
     }
@@ -74,24 +81,49 @@ class GameScene extends Phaser.Scene {
         });
     }
 
-    createShip() {
-        this.ship = new Ship({
-            scene: this,
-            key: 'ship',
-            texture: 'space',
-            x: this.WORLD_WIDTH / 2,
-            y: this.WORLD_HEIGHT / 2,
-            keys: this.player_keys
-        });
+    createShip(shipData) {
+        const def = { scene: this, key: 'ship', texture: 'space', x: this.WORLD_WIDTH / 2, y: this.WORLD_HEIGHT / 2, keys: this.player_keys }
 
-        this.cameras.main.startFollow(this.ship);
+        if (shipData.textureKey) {
+            def.texture = shipData.textureKey
+            def.scale = this.computeShipScale(shipData)
+        }
+        if (shipData.accel) def.accel = shipData.accel
+        if (shipData.rotation) def.rotation = shipData.rotation
+
+        this.ship = new Ship(def)
+
+        this.cameras.main.startFollow(this.ship)
 
         this.bullets = this.physics.add.group({
             classType: Bullet,
             maxSize: 30,
             runChildUpdate: true
-        });
-        this.ship.assignBullets(this.bullets);
+        })
+        this.ship.assignBullets(this.bullets)
+    }
+
+    computeShipScale(shipData) {
+        const tex = this.textures.get(shipData.textureKey)
+        const w = tex.getSourceImage().width
+        const desiredW = 48
+        return Math.min(1, desiredW / w)
+    }
+
+    rebuildShip(shipData) {
+        if (this.ship) {
+            this.ship.destroy()
+        }
+        if (this.bullets) {
+            this.bullets.destroy()
+        }
+        this.createShip(shipData)
+        if (this.ASTEROIDS_INITIALIZED) {
+            this.physics.world.removeCollider(this.collider_ship_asteroids)
+            this.physics.world.removeCollider(this.collider_bullets_asteroids)
+            this.collider_ship_asteroids = this.physics.add.collider(this.ship, this.asteroidsGroup, this.collideShipAsteroid)
+            this.collider_bullets_asteroids = this.physics.add.collider(this.bullets, this.asteroidsGroup, this.collideBulletAsteroid)
+        }
     }
 
     createAsteroids() {
@@ -193,6 +225,13 @@ class GameScene extends Phaser.Scene {
     }
 
     update(time, delta) {
+
+        if (this._pendingCustomShip && this._appliedShipVersion !== this._pendingShipVersion) {
+            const d = this._pendingCustomShip
+            this._appliedShipVersion = this._pendingShipVersion
+            this._pendingCustomShip = null
+            this.rebuildShip(d)
+        }
 
         if (this.ASTEROIDS_INITIALIZED == true) {
             this.collider_ship_asteroids.active = this.options.player_enable_ship_asteroids_collision;

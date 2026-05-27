@@ -16,10 +16,9 @@ export default class Ship extends Phaser.GameObjects.Sprite {
         this.type = 'ship';
         this.name = 'playerShip';
         this.status = 'active';
-        // this.setAlpha(0.3);
 
-        this.ROTATION = 180
-        this.ACCELERATION = 40
+        this.ROTATION = config.rotation || 180
+        this.ACCELERATION = config.accel || 40
         this.TURBO_ACCELERATION_INCREMENT = 5
         this.FIRE_INTERVALL = 15;
         this.HULL_REPAIR_INTERVALL = 10;
@@ -29,8 +28,11 @@ export default class Ship extends Phaser.GameObjects.Sprite {
         this.WEAPONS_BULLET_DISCHARGE_AMOUNT = 5;
         this.TURBO_INTERVALL = 2000;
 
-
-        this.setScale(0.5);
+        if (config.scale !== undefined) {
+            this.setScale(config.scale);
+        } else {
+            this.setScale(0.5);
+        }
         this.body.setMaxVelocity(600);
         this.body.setMaxSpeed(600);
         this.body.setDrag(0.5);
@@ -41,8 +43,8 @@ export default class Ship extends Phaser.GameObjects.Sprite {
         this.setDepth(1);
 
         this.hull_hb = new HealthBar({ scene: this.config.scene, width: 32, height: 4 , border_color: 0x00000000});
-        this.weapons_hb = new HealthBar({ scene: this.config.scene, width: 32, height: 4, fill_color: 0xff9c00, border_color: 0x00000000 });
-        this.turbo_hb = new HealthBar({ scene: this.config.scene, width: 32, height: 4, fill_color: 0x00ffff  , border_color: 0x00000000});
+        this.energy_hb = new HealthBar({ scene: this.config.scene, width: 32, height: 4, fill_color: 0xff9c00, border_color: 0x00000000 });
+        this.shield_hb = new HealthBar({ scene: this.config.scene, width: 32, height: 4, fill_color: 0x00ffff  , border_color: 0x00000000});
 
         this.trail_emitter = fx.createTrail(this, this.config.scene)
         this.assignKeys();
