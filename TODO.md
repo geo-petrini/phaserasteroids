@@ -88,6 +88,7 @@ SHIP EDITOR
   - weapons
     - gun level 1: 1x1
     - gun (tracking) level 1: 2x1
+    - gun (turret) level 1: 3x3, rotation: 30
   - drag and drop
 
 CUSTOM SHIP

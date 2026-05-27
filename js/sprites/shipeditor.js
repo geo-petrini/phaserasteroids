@@ -338,6 +338,12 @@ export default class ShipEditor {
     return { minCol, minRow, maxCol, maxRow }
   }
 
+  elementCenter(minCol, minRow, e) {
+    const cx = (e.col - minCol) * (CELL + GAP) + GAP + (e.el.w * (CELL + GAP) - GAP) / 2
+    const cy = (e.row - minRow) * (CELL + GAP) + GAP + (e.el.h * (CELL + GAP) - GAP) / 2
+    return { x: cx, y: cy }
+  }
+
   buildShip() {
     const error = this.validate()
     if (error) {
@@ -348,6 +354,8 @@ export default class ShipEditor {
     const { minCol, minRow, maxCol, maxRow } = this.computeBounds()
     const shipW = (maxCol - minCol) * (CELL + GAP) + GAP
     const shipH = (maxRow - minRow) * (CELL + GAP) + GAP
+    const ctrX = shipW / 2
+    const ctrY = shipH / 2
 
     const g = this.scene.add.graphics()
     for (const e of this.gridEntries) {
@@ -364,10 +372,36 @@ export default class ShipEditor {
     g.destroy()
 
     const stats = this.computeStats()
+    const fwdThrusters = []
+    const latThrusters = []
+    const weapons = []
+
+    for (const e of this.gridEntries) {
+      const c = this.elementCenter(minCol, minRow, e)
+      const relX = c.x - ctrX
+      const relY = c.y - ctrY
+
+      if (e.el.id.startsWith('thrust_f')) {
+        fwdThrusters.push({ x: relX, y: relY, color: e.el.particleColor })
+      } else if (e.el.id.startsWith('thrust_l')) {
+        latThrusters.push({ x: relX, y: relY, color: e.el.particleColor })
+      } else if (e.el.id.startsWith('gun') || e.el.id.startsWith('track')) {
+        weapons.push({ x: relX, y: relY, isTracking: e.el.id === 'trackgun' })
+      }
+    }
+
     stats.textureKey = texKey
+    stats.textureWidth = shipW
+    stats.textureHeight = shipH
+    stats.forwardThrusters = fwdThrusters
+    stats.lateralThrusters = latThrusters
+    stats.weaponPositions = weapons
 
     this.scene.registry.set('shipData', stats)
     this.scene.registry.set('shipDataVersion', (this.scene.registry.get('shipDataVersion') || 0) + 1)
+
+    localStorage.setItem('phaserAsteroidsShip', JSON.stringify(stats))
+
     this.shipBuilt = true
     this.showMessage('Ship built! Press O to play', 0x44ff44)
   }
@@ -375,21 +409,17 @@ export default class ShipEditor {
   computeStats() {
     let accel = 0, rotation = 0, energyGen = 0
     let shieldRecharge = 0, shieldCapacity = 0
-    const thrustParticleColors = []
 
     for (const e of this.gridEntries) {
       const el = e.el
-      if (el.accel) {
-        accel += el.accel
-        thrustParticleColors.push(el.particleColor)
-      }
+      if (el.accel) accel += el.accel
       if (el.rotation) rotation += el.rotation
       if (el.energyGen) energyGen += el.energyGen
       if (el.recharge) shieldRecharge += el.recharge
       if (el.capacity) shieldCapacity += el.capacity
     }
 
-    return { accel, rotation, energyGen, shieldRecharge, shieldCapacity, thrustParticleColors }
+    return { accel, rotation, energyGen, shieldRecharge, shieldCapacity }
   }
 
   showMessage(text, color) {

@@ -39,8 +39,17 @@ class BootScene extends Phaser.Scene {
             progress.destroy();
             text.destroy();
             console.log('load complete');
-            this.scene.start('GameScene');
-            this.scene.start('ShipConfigScene');
+
+            const saved = localStorage.getItem('phaserAsteroidsShip')
+            if (saved) {
+                const data = JSON.parse(saved)
+                this.registry.set('shipData', data)
+                this.registry.set('shipDataVersion', 1)
+                this.scene.start('GameScene');
+                this.scene.start('ShipConfigScene');
+            } else {
+                this.scene.start('ShipConfigScene');
+            }
         });
 
         this.load.image('background', 'assets/nebula.jpg');

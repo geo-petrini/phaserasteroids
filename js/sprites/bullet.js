@@ -9,19 +9,27 @@ export default class Bullet extends Phaser.Physics.Arcade.Image {
         this._temp = new Phaser.Math.Vector2()
     }
 
-    fire(ship) {
+    fire(ship, posX, posY, angleRad) {
         this.lifespan = 500
         this.setActive(true)
         this.setVisible(true)
-        this.setAngle(ship.body.rotation)
-        this.setPosition(ship.x, ship.y)
-        this.body.reset(ship.x, ship.y)
-        this.body.setSize(this.width, this.height, true)
 
-        const angle = Phaser.Math.DegToRad(ship.body.rotation)
-        this.scene.physics.velocityFromRotation(angle, this.speed, this.body.velocity)
+        const x = posX !== undefined ? posX : ship.x
+        const y = posY !== undefined ? posY : ship.y
+        const a = angleRad !== undefined ? angleRad : ship.rotation
+
+        this.setPosition(x, y)
+        this.body.reset(x, y)
+        this.body.setSize(this.width, this.height, true)
+        this.setAngle(Phaser.Math.RadToDeg(a))
+
+        this.scene.physics.velocityFromRotation(a, this.speed, this.body.velocity)
         this.body.velocity.x *= 2
         this.body.velocity.y *= 2
+    }
+
+    fireAt(ship, angleRad) {
+        this.fire(ship, ship.x, ship.y, angleRad)
     }
 
     update(time, delta) {

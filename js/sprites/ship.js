@@ -33,6 +33,7 @@ export default class Ship extends Phaser.GameObjects.Sprite {
         } else {
             this.setScale(0.5);
         }
+
         this.body.setMaxVelocity(600);
         this.body.setMaxSpeed(600);
         this.body.setDrag(0.5);
@@ -42,17 +43,61 @@ export default class Ship extends Phaser.GameObjects.Sprite {
         this.body.acceleration = this.ACCELERATION;
         this.setDepth(1);
 
-        this.hull_hb = new HealthBar({ scene: this.config.scene, width: 32, height: 4 , border_color: 0x00000000});
+        this.hull_hb = new HealthBar({ scene: this.config.scene, width: 32, height: 4, border_color: 0x00000000 });
         this.energy_hb = new HealthBar({ scene: this.config.scene, width: 32, height: 4, fill_color: 0xff9c00, border_color: 0x00000000 });
-        this.shield_hb = new HealthBar({ scene: this.config.scene, width: 32, height: 4, fill_color: 0x00ffff  , border_color: 0x00000000});
+        this.shield_hb = new HealthBar({ scene: this.config.scene, width: 32, height: 4, fill_color: 0x00ffff, border_color: 0x00000000 });
 
-        this.trail_emitter = fx.createTrail(this, this.config.scene)
-        this.assignKeys();
-        console.log(this);
+        this.forwardEmitters = []
+        this.lateralEmitters = []
+
+        if (config.forwardThrusters) {
+            for (const t of config.forwardThrusters) {
+                const e = config.scene.add.particles(0, 0, 'smoke', {
+                    speed: { min: 10, max: 50 },
+                    angle: {
+                        onEmit: () => (this.angle + 180) + Phaser.Math.Between(-20, 20),
+                    },
+                    scale: { start: 1, end: 0.2 },
+                    alpha: { start: 0.6, end: 0 },
+                    lifespan: 400,
+                    emitting: false,
+                    blendMode: 'ADD',
+                    tint: t.color,
+                })
+                this.forwardEmitters.push({ emitter: e, ox: t.x, oy: t.y })
+            }
+        }
+
+        if (config.lateralThrusters) {
+            for (const t of config.lateralThrusters) {
+                const side = t.x >= 0 ? 1 : -1
+                const e = config.scene.add.particles(0, 0, 'smoke', {
+                    speed: { min: 10, max: 40 },
+                    angle: {
+                        onEmit: () => (this.angle + 90 * side) + Phaser.Math.Between(-15, 15),
+                    },
+                    scale: { start: 0.8, end: 0.1 },
+                    alpha: { start: 0.5, end: 0 },
+                    lifespan: 300,
+                    emitting: false,
+                    blendMode: 'ADD',
+                    tint: t.color,
+                })
+                this.lateralEmitters.push({ emitter: e, ox: t.x, oy: t.y, side })
+            }
+        }
+
+        this.weaponOffsets = config.weaponPositions || []
+        this.trackWeaponOffsets = this.weaponOffsets.filter(w => w.isTracking)
+        this.fixedWeaponOffsets = this.weaponOffsets.filter(w => !w.isTracking)
+
+        this.trackTurretAngles = this.trackWeaponOffsets.map(() => 0)
+
+        this.assignKeys()
+        console.log(this)
     }
 
     assignKeys() {
-
     }
 
     assignBullets(bullets, bulletSound) {
@@ -70,10 +115,11 @@ export default class Ship extends Phaser.GameObjects.Sprite {
         this.energy_hb.visible = false;
         this.shield_hb.visible = false;
         this.visible = false;
+        for (const fe of this.forwardEmitters) { fe.emitter.emitting = false; fe.emitter.destroy() }
+        for (const le of this.lateralEmitters) { le.emitter.emitting = false; le.emitter.destroy() }
         fx.createSmokeFX(this.x, this.y, this.config.scene);
         fx.createFlameFX(this.x, this.y, this.config.scene);
         fx.createBlastFX(this.x, this.y, this.config.scene);
-
         this.keys = null;
     }
 
@@ -139,15 +185,98 @@ export default class Ship extends Phaser.GameObjects.Sprite {
 
     _fire(time) {
         if (this.energy_hb.value > this.WEAPONS_BULLET_DISCHARGE_AMOUNT) {
-            var bullet = this.bullets.get();
-
-            if (bullet) {
-                bullet.fire(this);
-                bullet.setDepth(this.depth - 1);
-                this.lastFired = time + this.FIRE_INTERVALL;
-                this.config.scene.sounds['laser'].play({ 'volume': this.config.scene.options.volume_bullets });
+            for (const off of this.fixedWeaponOffsets) {
+                const cos = Math.cos(this.rotation)
+                const sin = Math.sin(this.rotation)
+                const wx = this.x + off.x * cos - off.y * sin
+                const wy = this.y + off.x * sin + off.y * cos
+                const bullet = this.bullets.get()
+                if (bullet) {
+                    bullet.fire(this, wx, wy)
+                    bullet.setDepth(this.depth - 1)
+                }
+            }
+            this.lastFired = time + this.FIRE_INTERVALL
+            if (this.fixedWeaponOffsets.length > 0) {
+                this.config.scene.sounds['laser'].play({ 'volume': this.config.scene.options.volume_bullets })
                 this.energy_hb.decrease(1)
             }
+        }
+    }
+
+    _fireTracking(time) {
+        if (this.energy_hb.value > this.WEAPONS_BULLET_DISCHARGE_AMOUNT) {
+            const asteroids = this.config.scene.asteroidsArray
+            let anyFired = false
+            for (let i = 0; i < this.trackWeaponOffsets.length; i++) {
+                const off = this.trackWeaponOffsets[i]
+                const target = this._findTarget(asteroids)
+                if (!target) continue
+
+                const dx = target.x - this.x
+                const dy = target.y - this.y
+                const desiredAngle = Math.atan2(dy, dx)
+                const diff = Phaser.Math.Angle.Wrap(desiredAngle - this.trackTurretAngles[i])
+                const turnSpeed = 3 * (Math.PI / 180)
+                if (Math.abs(diff) > turnSpeed) {
+                    this.trackTurretAngles[i] += Math.sign(diff) * turnSpeed
+                } else {
+                    this.trackTurretAngles[i] = desiredAngle
+                }
+
+                const cos = Math.cos(this.rotation)
+                const sin = Math.sin(this.rotation)
+                const wx = this.x + off.x * cos - off.y * sin
+                const wy = this.y + off.x * sin + off.y * cos
+                const bullet = this.bullets.get()
+                if (bullet) {
+                    bullet.fire(this, wx, wy, this.trackTurretAngles[i])
+                    bullet.setDepth(this.depth - 1)
+                    anyFired = true
+                }
+            }
+            if (anyFired) {
+                this.lastFired = time + this.FIRE_INTERVALL
+                this.config.scene.sounds['laser'].play({ 'volume': this.config.scene.options.volume_bullets })
+                this.energy_hb.decrease(1)
+            }
+        }
+    }
+
+    _findTarget(asteroids) {
+        let best = null
+        let bestDist = Infinity
+        for (const a of asteroids) {
+            const dx = a.x - this.x
+            const dy = a.y - this.y
+            const dist = dx * dx + dy * dy
+            if (dist > 0 && dist < bestDist) {
+                bestDist = dist
+                best = a
+            }
+        }
+        return best
+    }
+
+    _updateThrusterEmitters(isAccelerating, rotDir) {
+        for (const fe of this.forwardEmitters) {
+            const cos = Math.cos(this.rotation)
+            const sin = Math.sin(this.rotation)
+            fe.emitter.setPosition(
+                this.x + fe.ox * cos - fe.oy * sin,
+                this.y + fe.ox * sin + fe.oy * cos
+            )
+            fe.emitter.emitting = isAccelerating
+        }
+
+        for (const le of this.lateralEmitters) {
+            const cos = Math.cos(this.rotation)
+            const sin = Math.sin(this.rotation)
+            le.emitter.setPosition(
+                this.x + le.ox * cos - le.oy * sin,
+                this.y + le.ox * sin + le.oy * cos
+            )
+            le.emitter.emitting = rotDir !== 0
         }
     }
 
@@ -171,29 +300,30 @@ export default class Ship extends Phaser.GameObjects.Sprite {
         if (keys == null) {
 
         } else {
+            let rotDir = 0
             if (keys.left.isDown || keys.alt_left.isDown) {
                 this._rotate("left")
+                rotDir = -1
             }
             if (keys.right.isDown || keys.alt_right.isDown) {
                 this._rotate("right")
+                rotDir = 1
             }
 
-            if (keys.up.isDown || keys.alt_up.isDown) {
-                this.trail_emitter.startFollow(this)
-                this.trail_emitter.emitting = true
-                this._accelerate();
-            } else {
-                this.trail_emitter.stopFollow()
-                this.trail_emitter.emitting = false
+            const isAccel = keys.up.isDown || keys.alt_up.isDown
+            if (isAccel) {
+                this._accelerate()
             }
             if (keys.turbo.isDown && time > this.lastTurbo) {
-                this._accelerate(true);
-
-                this.lastTurbo = time + this.TURBO_INTERVALL;
+                this._accelerate(true)
+                this.lastTurbo = time + this.TURBO_INTERVALL
             }
 
+            this._updateThrusterEmitters(isAccel, rotDir)
+
             if (keys.fire.isDown && time > this.lastFired) {
-                this._fire(time);
+                this._fire(time)
+                this._fireTracking(time)
             }
 
             if (time > this.lastRepaired) {
@@ -204,8 +334,6 @@ export default class Ship extends Phaser.GameObjects.Sprite {
                 this._rechargeEnergy()
                 this.lastWeaponsRecharge = time + this.WEAPONS_RECHARGE_INTERVALL;
             }
-
-
         }
     }
 };

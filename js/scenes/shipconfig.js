@@ -23,7 +23,10 @@ class ShipConfigScene extends Phaser.Scene {
 
         this.toggleKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.O)
 
-        this.scene.switch('GameScene')
+        const saved = localStorage.getItem('phaserAsteroidsShip')
+        if (saved) {
+            this.scene.switch('GameScene')
+        }
     }
 
     update(time, delta) {
@@ -31,7 +34,11 @@ class ShipConfigScene extends Phaser.Scene {
             this.input.stopPropagation()
             const shipData = this.registry.get('shipData')
             if (shipData) {
-                const gs = this.scene.get('GameScene')
+                let gs = this.scene.get('GameScene')
+                if (!gs) {
+                    this.scene.start('GameScene')
+                    gs = this.scene.get('GameScene')
+                }
                 gs._pendingCustomShip = shipData
                 gs._pendingShipVersion = this.registry.get('shipDataVersion') || 0
             }
