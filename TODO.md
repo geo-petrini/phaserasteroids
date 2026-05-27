@@ -63,7 +63,11 @@ UI
 SHIP EDITOR
 - editor grid 9x9
 - elements:
-  - cabin (1x2)
+  - hull
+    - cabin (1x2)
+    - connector S 1x1
+    - connector M 2x2
+    - connector L 3x3
   - generator
     - level 1: 1x1
     - level 2: 1x2
@@ -81,6 +85,7 @@ SHIP EDITOR
     - gun (tracking) level 1: 2x1
   - drag and drop
   
+
 
 links
 https://phaserplugins.com/

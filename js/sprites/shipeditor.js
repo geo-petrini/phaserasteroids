@@ -6,19 +6,47 @@ const GRID_X = 60
 const GRID_Y = 60
 const PALETTE_X = 580
 
-const ELEMENTS = [
-  { id: 'cabin',    label: 'Cabin',     w: 1, h: 2, color: 0xf0d060 },
-  { id: 'gen1',     label: 'Gen L1',    w: 1, h: 1, color: 0x4488ff },
-  { id: 'gen2',     label: 'Gen L2',    w: 1, h: 2, color: 0x44a0ff },
-  { id: 'gen3',     label: 'Gen L3',    w: 1, h: 3, color: 0x44b8ff },
-  { id: 'thrust1',  label: 'Thrust L1', w: 1, h: 1, color: 0xff6644 },
-  { id: 'thrust2',  label: 'Thrust L2', w: 1, h: 2, color: 0xff8044 },
-  { id: 'thrust3',  label: 'Thrust L3', w: 1, h: 3, color: 0xff9944 },
-  { id: 'shield1',  label: 'Shield L1', w: 1, h: 1, color: 0x44ffcc },
-  { id: 'shield2',  label: 'Shield L2', w: 1, h: 2, color: 0x44ffdd },
-  { id: 'shield3',  label: 'Shield L3', w: 1, h: 3, color: 0x44ffee },
-  { id: 'gun1',     label: 'Gun L1',    w: 1, h: 1, color: 0xffaa44 },
-  { id: 'trackgun', label: 'Track Gun', w: 2, h: 1, color: 0xffbb66 },
+const CATEGORIES = [
+  {
+    name: 'HULL', color: 0xf0d060,
+    items: [
+      { id: 'cabin',      label: 'Cabin',       w: 1, h: 2 },
+      { id: 'connector_s',label: 'Connector S', w: 1, h: 1 },
+      { id: 'connector_m',label: 'Connector M', w: 2, h: 2 },
+      { id: 'connector_l',label: 'Connector L', w: 3, h: 3 },
+    ],
+  },
+  {
+    name: 'GENERATOR', color: 0x4488ff,
+    items: [
+      { id: 'gen1', label: 'Gen L1', w: 1, h: 1 },
+      { id: 'gen2', label: 'Gen L2', w: 1, h: 2 },
+      { id: 'gen3', label: 'Gen L3', w: 1, h: 3 },
+    ],
+  },
+  {
+    name: 'THRUSTERS', color: 0xff6644,
+    items: [
+      { id: 'thrust1', label: 'Thrust L1', w: 1, h: 1 },
+      { id: 'thrust2', label: 'Thrust L2', w: 1, h: 2 },
+      { id: 'thrust3', label: 'Thrust L3', w: 1, h: 3 },
+    ],
+  },
+  {
+    name: 'SHIELDS', color: 0x44ffcc,
+    items: [
+      { id: 'shield1', label: 'Shield L1', w: 1, h: 1 },
+      { id: 'shield2', label: 'Shield L2', w: 1, h: 2 },
+      { id: 'shield3', label: 'Shield L3', w: 1, h: 3 },
+    ],
+  },
+  {
+    name: 'WEAPONS', color: 0xffaa44,
+    items: [
+      { id: 'gun1',     label: 'Gun L1',    w: 1, h: 1 },
+      { id: 'trackgun', label: 'Track Gun', w: 2, h: 1 },
+    ],
+  },
 ]
 
 export default class ShipEditor {
@@ -27,10 +55,15 @@ export default class ShipEditor {
     this.grid = Array.from({ length: ROWS }, () => Array(COLS).fill(null))
     this.gridEntries = []
     this.dragging = null
+    this.currentPage = 0
+    this.paletteGroup = []
 
     this.bg = scene.add.graphics()
+    this.paletteBg = scene.add.graphics()
+    this.navGroup = []
     this.drawGrid()
-    this.createPalette()
+    this.createNavButtons()
+    this.drawPalettePage()
   }
 
   cellToPixel(col, row) {
@@ -130,9 +163,32 @@ export default class ShipEditor {
     }
   }
 
-  createPalette() {
-    let y = GRID_Y
-    for (const el of ELEMENTS) {
+  clearPalettePage() {
+    for (const obj of this.paletteGroup) {
+      obj.destroy()
+    }
+    this.paletteGroup = []
+    this.paletteBg.clear()
+  }
+
+  drawPalettePage() {
+    this.clearPalettePage()
+
+    const cat = CATEGORIES[this.currentPage]
+    const PAGE_Y = GRID_Y
+
+    this.paletteBg.fillStyle(0x0a0a1a, 1)
+    this.paletteBg.fillRect(PALETTE_X - 10, PAGE_Y - 10, 200,
+      this.paletteHeight() + 20)
+
+    const title = this.scene.add.text(PALETTE_X, PAGE_Y, cat.name, {
+      fontSize: '13px', color: '#8888ff',
+    })
+    this.paletteGroup.push(title)
+
+    let y = PAGE_Y + 24
+    for (const el of cat.items) {
+      el.color = cat.color
       const w = el.w * (CELL + GAP) - GAP
       const h = el.h * (CELL + GAP) - GAP
       const cx = PALETTE_X + w / 2
@@ -173,7 +229,62 @@ export default class ShipEditor {
         this.dragging = null
       })
 
-      y += h + 16
+      this.paletteGroup.push(rect, label)
+      y += h + 14
     }
+  }
+
+  paletteHeight() {
+    const cat = CATEGORIES[this.currentPage]
+    let h = 24
+    for (const el of cat.items) {
+      h += el.h * (CELL + GAP) - GAP + 14
+    }
+    return h
+  }
+
+  createNavButtons() {
+    const navY = GRID_Y + ROWS * (CELL + GAP) + GAP + 30
+
+    this.scene.add.text(PALETTE_X, navY, 'Page:', {
+      fontSize: '12px', color: '#8888ff',
+    })
+
+    const prevBg = this.scene.add.rectangle(PALETTE_X + 50, navY + 8, 30, 20, 0x444466)
+    prevBg.setInteractive({ useHandCursor: true })
+    const prevLabel = this.scene.add.text(PALETTE_X + 50, navY + 8, '\u25C0', {
+      fontSize: '12px', color: '#fff',
+    }).setOrigin(0.5)
+    prevBg.on('pointerdown', () => this.prevPage())
+
+    this.pageText = this.scene.add.text(PALETTE_X + 90, navY + 8, '', {
+      fontSize: '12px', color: '#fff',
+    }).setOrigin(0.5)
+
+    const nextBg = this.scene.add.rectangle(PALETTE_X + 130, navY + 8, 30, 20, 0x444466)
+    nextBg.setInteractive({ useHandCursor: true })
+    const nextLabel = this.scene.add.text(PALETTE_X + 130, navY + 8, '\u25B6', {
+      fontSize: '12px', color: '#fff',
+    }).setOrigin(0.5)
+    nextBg.on('pointerdown', () => this.nextPage())
+
+    this.navGroup.push(prevBg, prevLabel, nextBg, nextLabel, this.pageText)
+    this.updatePageText()
+  }
+
+  updatePageText() {
+    this.pageText.setText(`${this.currentPage + 1}/${CATEGORIES.length}`)
+  }
+
+  prevPage() {
+    this.currentPage = (this.currentPage - 1 + CATEGORIES.length) % CATEGORIES.length
+    this.drawPalettePage()
+    this.updatePageText()
+  }
+
+  nextPage() {
+    this.currentPage = (this.currentPage + 1) % CATEGORIES.length
+    this.drawPalettePage()
+    this.updatePageText()
   }
 }
