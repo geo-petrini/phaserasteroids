@@ -13,7 +13,6 @@ export default class Ship extends Phaser.GameObjects.Sprite {
         config.scene.physics.world.enable(this);
         config.scene.add.existing(this);
         this.config = config;
-        // this.scene = this.config.scene;
         this.type = 'ship';
         this.name = 'playerShip';
         this.status = 'active';
@@ -22,10 +21,8 @@ export default class Ship extends Phaser.GameObjects.Sprite {
         this.ACCELERATION = 40
         this.TURBO_ACCELERATION_INCREMENT = 5
         this.FIRE_INTERVALL = 5;
-        //NOT USED this.HULL_AMOUNT = 10;  
         this.HULL_REPAIR_INTERVALL = 10;
         this.HULL_REPAIR_AMOUNT = 0.001;
-        //NOT USED this.WEAPONS_CHARGE_MAX = 20;   
         this.WEAPONS_RECHARGE_INTERVALL = 10;
         this.WEAPONS_RECHARGE_AMOUNT = 0.1;
         this.WEAPONS_BULLET_DISCHARGE_AMOUNT = 5;
@@ -33,26 +30,18 @@ export default class Ship extends Phaser.GameObjects.Sprite {
 
 
         this.setScale(0.5);
-        //this.body.maxVelocity.x = 600;
-        //this.body.maxVelocity.y = 600;
         this.body.setMaxVelocity(600);
         this.body.setMaxSpeed(600);
-        //this.body.setDrag(200, 200);
         this.body.setDrag(0.5);
         this.body.allowDrag = true;
-        this.body.useDamping = true;    //https://newdocs.phaser.io/docs/3.55.2/focus/Phaser.Physics.Arcade.Body-useDamping
+        this.body.useDamping = true;
         this.body.angularDrag = 150;
         this.body.acceleration = this.ACCELERATION;
         this.setDepth(1);
-        //this.setDrag(200);
-        //this.setAngularDrag(150);
-        //ship.setMaxVelocity(700);	//wrong axes https://phaser.discourse.group/t/arcade-physics-incorrect-velocity-vector-when-trying-to-fly-forward/4126        
 
-        this.hull_hb = new HealthBar({ scene: this.config.scene, width: 32, height: 4 });
-        this.weapons_hb = new HealthBar({ scene: this.config.scene, width: 32, height: 4, fill_color: 0xff9c00 });
-        this.turbo_hb = new HealthBar({ scene: this.config.scene, width: 32, height: 4, fill_color: 0x00ffff });
-        //this.repairEvent = this.config.scene.time.addEvent({ delay: 1000, callback: this.repairHull, callbackScope: this, loop: true });
-        //this.repairEvent = this.config.scene.time.addEvent({ delay: 1000, loop: true });
+        this.hull_hb = new HealthBar({ scene: this.config.scene, width: 32, height: 4 , border_color: 0x00000000});
+        this.weapons_hb = new HealthBar({ scene: this.config.scene, width: 32, height: 4, fill_color: 0xff9c00, border_color: 0x00000000 });
+        this.turbo_hb = new HealthBar({ scene: this.config.scene, width: 32, height: 4, fill_color: 0x00ffff  , border_color: 0x00000000});
 
         this.trail_emitter = fx.createTrail(this, this.config.scene)
         this.assignKeys();
@@ -60,7 +49,6 @@ export default class Ship extends Phaser.GameObjects.Sprite {
     }
 
     assignKeys() {
-        //TODO add events so that keys can be removed from update()
 
     }
 
@@ -84,11 +72,9 @@ export default class Ship extends Phaser.GameObjects.Sprite {
         fx.createBlastFX(this.x, this.y, this.config.scene);
 
         this.keys = null;
-        //TODO disable commands
-        //TODO display wreckage
     }
 
-    _checkOptions(){
+    _checkOptions() {
         const options = this.config.scene.options;
         this.HULL_REPAIR_AMOUNT = options.player_hull_repair_amount
         this.WEAPONS_RECHARGE_AMOUNT = options.player_weapons_recharge_amount
@@ -96,30 +82,33 @@ export default class Ship extends Phaser.GameObjects.Sprite {
 
     _repairHull() {
         if (this.hull_hb.value < 100) {
-            // console.log('repairing hb: '+this.hull_hb.value)
             this.hull_hb.increase(this.HULL_REPAIR_AMOUNT)
         }
     }
 
     _rechargeWeapons() {
         if (this.weapons_hb.value < 100) {
-            // console.log('recharging weapons: '+this.weapons_hb.value)
             this.weapons_hb.increase(this.WEAPONS_RECHARGE_AMOUNT)
         }
     }
 
     _repositionHealthBars() {
+        const cam = this.config.scene.cameras.main
         let v_offset = 4
-        this.hull_hb.x = this.x - this.body.width / 2
-        this.hull_hb.y = this.y + this.body.height
+
+        const shipScreenX = cam.width / 2
+        const shipScreenY = cam.height / 2
+
+        this.hull_hb.x = shipScreenX - this.body.width / 2
+        this.hull_hb.y = shipScreenY + this.body.height
         this.hull_hb.draw()
 
-        this.weapons_hb.x = this.x - this.body.width / 2
-        this.weapons_hb.y = this.y + this.body.height + v_offset
+        this.weapons_hb.x = shipScreenX - this.body.width / 2
+        this.weapons_hb.y = shipScreenY + this.body.height + v_offset
         this.weapons_hb.draw()
 
-        this.turbo_hb.x = this.x - this.body.width / 2
-        this.turbo_hb.y = this.y + this.body.height + v_offset * 2
+        this.turbo_hb.x = shipScreenX - this.body.width / 2
+        this.turbo_hb.y = shipScreenY + this.body.height + v_offset * 2
         this.turbo_hb.draw()
     }
 
@@ -133,7 +122,7 @@ export default class Ship extends Phaser.GameObjects.Sprite {
     }
 
     _accelerate(turbo = false) {
-        const vector = this.config.scene.physics.velocityFromRotation(this.rotation, 1);//, this.body.velocity);
+        const vector = this.config.scene.physics.velocityFromRotation(this.rotation, 1);
         const vel = this.body.velocity
         if (turbo) {
             vel.x += vector.x * this.body.acceleration * this.TURBO_ACCELERATION_INCREMENT
@@ -153,13 +142,13 @@ export default class Ship extends Phaser.GameObjects.Sprite {
                 bullet.fire(this);
                 bullet.setDepth(this.depth - 1);
                 this.lastFired = time + this.FIRE_INTERVALL;
-                this.config.scene.sounds['laser'].play({'volume':this.config.scene.options.volume_bullets});
+                this.config.scene.sounds['laser'].play({ 'volume': this.config.scene.options.volume_bullets });
                 this.weapons_hb.decrease(1)
             }
         }
     }
 
-    toString(){
+    toString() {
         let outstr = ""
         outstr += 'Ship('
         outstr += `center: {x: ${this.x.toFixed(2)} y: ${this.y.toFixed(2)} `
@@ -179,7 +168,6 @@ export default class Ship extends Phaser.GameObjects.Sprite {
         if (keys == null) {
 
         } else {
-            //console.log('ship: (' + this.x + ';' + this.y + ')')
             if (keys.left.isDown || keys.alt_left.isDown) {
                 this._rotate("left")
             }

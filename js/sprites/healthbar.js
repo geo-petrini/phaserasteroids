@@ -1,7 +1,10 @@
+import { parseColor } from '../utils/helpers.js';
+
 export default class HealthBar {
 
     constructor({ scene, x = 0, y = 0, width = 80, height = 16, fill_color = 0x00ff00, warn_color = 0xffff00, danger_color = 0xff0000, border_color = 0x000000, empty_color = 0xffffff, max_value = 100, danger_value = 30, warn_value = 50 }) {
         this.bar = new Phaser.GameObjects.Graphics(scene);
+        this.bar.setScrollFactor(0);
 
         this.x = x;
         this.y = y;
@@ -10,9 +13,8 @@ export default class HealthBar {
         this.margin = 1;
         this.max_value = max_value;
         this.value = this.max_value;
-        this.danger_value = 
-        
-        this.pixel_value = this.width / this.max_value;
+
+        this.pixel_value = (this.width - this.margin * 2) / this.max_value;
 
 
         this.fill_color = fill_color
@@ -51,33 +53,35 @@ export default class HealthBar {
         return (this.value === this.max_value);
     }
 
+    _fill(hex) {
+        const { color, alpha } = parseColor(hex);
+        this.bar.fillStyle(color, alpha);
+    }
+
     draw() {
         this.bar.visible = this.visible
 
-
         this.bar.clear();
 
-        //  BG
-        this.bar.fillStyle(this.border_color);
+        this._fill(this.border_color);
         this.bar.fillRect(this.x, this.y, this.width, this.height);
 
-        //  Health
-
-        this.bar.fillStyle(this.empty_color);
+        this._fill(this.empty_color);
         this.bar.fillRect(this.x + 2, this.y + 2, this.width - this.margin * 2, this.height - this.margin * 2);
 
+        let c
         if (this.value < 30) {
-            this.bar.fillStyle(this.danger_color);
+            c = this.danger_color;
         }
         else if (this.value < 50) {
-            this.bar.fillStyle(this.warn_color);
+            c = this.warn_color;
         }
         else {
-            this.bar.fillStyle(this.fill_color);
+            c = this.fill_color;
         }
 
+        this._fill(c);
         var d = Math.floor(this.pixel_value * this.value);
-
         this.bar.fillRect(this.x + 2, this.y + 2, d, this.height - this.margin * 2);
 
     }

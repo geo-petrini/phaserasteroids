@@ -1,44 +1,43 @@
-/*
-deprecated
-the game now uses the radar class
+export default class MiniMap {
+    constructor(scene) {
+        this.scene = scene
+        this.size = 160
+        this.margin = 10
+        this.bgColor = 0x002244
+        this.borderColor = 0x4488ff
+        this.shipColor = 0x00ff00
+        this.asteroidColor = 0xff4444
 
-works but needs some reworking as it shows everything
-in case it is needed again add this in gamescene create()
-        
-  let minimapMargin = 10
-  let minimapWidth = 400
-  let minimapHeight = 200        
-  this.minimap = new MiniMap( {
-      scene:this, 
-      zoom: 0.05
-      //x:this.game_width - minimapWidth - minimapMargin , 
-      //y:this.game_height - minimapHeight - minimapMargin,
-      //width: minimapWidth,
-      //height: minimapHeight
-  } ).init()
-*/
+        this.g = scene.add.graphics()
+        this.g.setScrollFactor(0)
+        this.g.setDepth(100)
+    }
 
-export default class MiniMap extends Phaser.Cameras.Scene2D.Camera {
-    constructor ({
-      scene,
-      x = 10,
-      y = 10,
-      width = 192,
-      height = 192,
-      zoom = 0.1,
-      scroll = { x: 960, y: 960 }
-    }) {
-      super(x, y, width, height)
-      this.scene = scene
-      this.zoom = zoom
-      this.scroll = scroll
+    update(worldW, worldH) {
+        const cam = this.scene.cameras.main
+        const x = cam.width - this.size - this.margin
+        const y = this.margin
+        const ship = this.scene.ship
+        const shipX = ship.x / worldW
+        const shipY = ship.y / worldH
+
+        this.g.clear()
+
+        this.g.fillStyle(this.bgColor, 0.8)
+        this.g.fillRect(x, y, this.size, this.size)
+        this.g.lineStyle(1, this.borderColor, 1)
+        this.g.strokeRect(x, y, this.size, this.size)
+
+        for (const asteroid of this.scene.asteroidsArray) {
+            const ax = x + (asteroid.x / worldW) * this.size
+            const ay = y + (asteroid.y / worldH) * this.size
+            this.g.fillStyle(this.asteroidColor, 0.6)
+            this.g.fillPoint(ax, ay, 2)
+        }
+
+        const sx = x + shipX * this.size
+        const sy = y + shipY * this.size
+        this.g.fillStyle(this.shipColor, 1)
+        this.g.fillPoint(sx, sy, 4)
     }
-  
-    init () {
-      this.scene.cameras.cameras.push(this)
-      this.scene.cameras.addExisting(this)
-      this.setZoom(this.zoom)
-      this.setScroll(this.scroll.x, this.scroll.y)
-      return this
-    }
-  }
+}

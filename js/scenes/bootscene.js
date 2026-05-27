@@ -10,8 +10,8 @@ class BootScene extends Phaser.Scene {
         console.log('loading...');
         const progress = this.add.graphics();
         const text = this.add.text(
-            this.sys.game.scale.width /2 - 50,
-            this.sys.game.scale.height /2 - 50,
+            this.sys.game.scale.width / 2 - 50,
+            this.sys.game.scale.height / 2 - 50,
             {
                 color: '#fff',
                 stroke: '#f00',
@@ -28,7 +28,6 @@ class BootScene extends Phaser.Scene {
             }
         )
 
-        // Register a load progress event to show a load bar
         this.load.on('progress', (value) => {
             progress.clear();
             progress.fillStyle(0xffffff, 1);
@@ -36,9 +35,7 @@ class BootScene extends Phaser.Scene {
             text.setText('<< LOADING >>')
         });
 
-        // Register a load complete event to launch the title screen when all files are loaded
         this.load.on('complete', () => {
-            // prepare all animations, defined in a separate file
             progress.destroy();
             text.destroy();
             console.log('load complete');
@@ -46,14 +43,13 @@ class BootScene extends Phaser.Scene {
             this.scene.start('ShipConfigScene');
         });
 
-        // load stuff
         this.load.image('background', 'assets/nebula.jpg');
         this.load.image('stars', 'assets/stars.png');
         this.load.atlas('space', 'assets/space.png', 'assets/space.json');
-        this.load.image('asteroid1', 'assets/asteroid1.png');
-        this.load.image('asteroid2', 'assets/asteroid2.png');
-        this.load.image('asteroid3', 'assets/asteroid3.png');
-        this.load.image('asteroid4', 'assets/asteroid4.png');
+        this.load.spritesheet('asteroid1-sheet', 'assets/asteroid1.png', { frameWidth: 96, frameHeight: 96 });
+        this.load.spritesheet('asteroid2-sheet', 'assets/asteroid2.png', { frameWidth: 96, frameHeight: 96 });
+        this.load.spritesheet('asteroid3-sheet', 'assets/asteroid3.png', { frameWidth: 96, frameHeight: 96 });
+        this.load.spritesheet('asteroid4-sheet', 'assets/asteroid4.png', { frameWidth: 64, frameHeight: 64 });
         this.load.image('smoke', 'assets/smoke.png');
         this.load.image('blastwave', 'assets/blastwave1.png');
         this.load.image('flame', 'assets/muzzleflash7.png');
@@ -64,7 +60,6 @@ class BootScene extends Phaser.Scene {
         this.load.audio('explosion_short', ['sounds/explosion_short.wav']);
         this.load.audio('asteroid_explosion_1', ['sounds/asteroid_explosion_1.wav']);
         this.cameras.main.fadeOut(150);
-        //this.cameras.main.flash(50)
     }
 }
 

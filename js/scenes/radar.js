@@ -1,128 +1,83 @@
 export default class Radar {
-    constructor (scene){
+    constructor(scene) {
         this.scene = scene
-        this.scene.radarGraphics = this.scene.add.graphics();
-        this.g = this.scene.radarGraphics;
-        //this.g.setScrollFactor(0)
-        //this.g = new Phaser.GameObjects.Graphics(scene);
+        this.g = scene.add.graphics()
+        this.g.setScrollFactor(0)
         this.DEBUGLINES = false
-        this.DOT_MAX_SIZE = 5 //maximum size
+        this.DOT_MAX_SIZE = 5
         this.DOT_LINE_SIZE = 1
-        this.DOT_LINE_COLOR = Phaser.Display.Color.GetColor(200, 200, 200);
-        this.DOT_FILL_COLOR = Phaser.Display.Color.GetColor(100, 100, 100);
-        this.DBG_LINE_COLOR = Phaser.Display.Color.GetColor(0, 0, 210);
+        this.DOT_LINE_COLOR = 0xc8c8c8
+        this.DOT_FILL_COLOR = 0x646464
+        this.DBG_LINE_COLOR = 0x0000d2
     }
-  
+
     update() {
-        this.g.clear();
-        this.drawRect();
+        this.g.clear()
 
-        if (this.DEBUGLINES){
-            this.scene.asteroidsArray.forEach( this.drawLine, this );
+        const cam = this.scene.cameras.main
+        const margin = this.DOT_MAX_SIZE
+        this.rectX = margin
+        this.rectY = margin
+        this.rectW = cam.width - margin * 2
+        this.rectH = cam.height - margin * 2
+
+        if (this.DEBUGLINES) {
+            this.g.lineStyle(2, 0x00bb00)
+            this.g.strokeRect(this.rectX, this.rectY, this.rectW, this.rectH)
         }
-        
-        this.scene.asteroidsArray.forEach( this.drawIntersection, this );
-        this.g.setAlpha(0.5);
+
+        const ship = this.scene.ship
+        if (!ship) return
+
+        this.scene.asteroidsArray.forEach(asteroid => {
+            this.drawIntersection(asteroid, cam, ship)
+        })
+
+        this.g.setAlpha(0.5)
     }
 
-    drawIntersection(asteroid){
-        this.g.lineStyle(this.DOT_LINE_SIZE, this.DOT_LINE_COLOR);
-        this.g.fillStyle(this.DOT_FILL_COLOR);
+    drawIntersection(asteroid, cam, ship) {
+        const sx = cam.width / 2
+        const sy = cam.height / 2
 
-        try{
-            const pointCoords = this.pointOnRect(
-                asteroid.x, 
-                asteroid.y, 
-                this.rect.x, 
-                this.rect.y, 
-                this.rect.x + this.rect.width, 
-                this.rect.y + this.rect.height, 
-                true
-                );
+        const ax = sx + (asteroid.x - ship.x)
+        const ay = sy + (asteroid.y - ship.y)
 
-            const distance = this.getAsteroidDistance(asteroid);
-            const vicinity = this.getAsteroidVicinity(distance);
-            const point_size = Math.max(this.DOT_MAX_SIZE * vicinity, 1);
-            this.g.fillPoint(pointCoords.x, pointCoords.y, point_size);
-            //const point = new Phaser.Geom.Point(pointCoords.x, pointCoords.y, point_size);
-            //this.g.fillPointShape(point, point_size);
-        } catch (error){
-            console.error(error)
+        if (ax >= this.rectX && ax <= this.rectX + this.rectW &&
+            ay >= this.rectY && ay <= this.rectY + this.rectH) {
+            return
         }
+
+        const dist = Math.sqrt((ax - sx) ** 2 + (ay - sy) ** 2)
+        if (dist < 1) return
+
+        const point = this.rayIntersectRect(sx, sy, ax, ay, this.rectX, this.rectY, this.rectW, this.rectH)
+        if (!point) return
+
+        const minDim = Math.max(this.rectW, this.rectH)
+        const vicinity = minDim / dist
+        const pointSize = Math.max(this.DOT_MAX_SIZE * vicinity, 1)
+
+        this.g.lineStyle(this.DOT_LINE_SIZE, this.DOT_LINE_COLOR)
+        this.g.fillStyle(this.DOT_FILL_COLOR)
+        this.g.fillPoint(point.x, point.y, pointSize)
     }
 
-    getAsteroidDistance(asteroid){
-        const l1 = this.scene.ship.x - asteroid.x;
-        const l2 = this.scene.ship.y - asteroid.y;
-        return Math.sqrt(l1*l1+l2*l2)
-    }
+    rayIntersectRect(x1, y1, x2, y2, rx, ry, rw, rh) {
+        const dx = x2 - x1
+        const dy = y2 - y1
 
-    getAsteroidVicinity(distance){
-        const minDistance = Math.max(this.scene.cameras.main.width, this.scene.cameras.main.height)
-        //const minDistance = Math.max(this.scene.game_width, this.scene.game_height)
-        return minDistance/distance
-    }
+        const left = (rx - x1) / dx
+        const right = (rx + rw - x1) / dx
+        const top = (ry - y1) / dy
+        const bottom = (ry + rh - y1) / dy
 
-    drawRect(){
-        const margin = this.DOT_MAX_SIZE;
-        const rectX = this.scene.cameras.main.scrollX;
-        const rectY = this.scene.cameras.main.scrollY;
-        //const rectWidth = this.scene.game_width ;
-        //const rectHeight = this.scene.game_height 
-        const rectWidth = this.scene.cameras.main.width;
-        const rectHeight = this.scene.cameras.main.height;
-        this.rect = new Phaser.Geom.Rectangle(rectX + margin, rectY + margin, rectWidth-margin*2, rectHeight-margin*2);
-        if (this.DEBUGLINES){
-            this.g.lineStyle(2, 0x00bb00);
-            this.g.strokeRectShape(this.rect);
-        }
-    }
+        const tMin = Math.max(Math.min(left, right), Math.min(top, bottom))
+        const tMax = Math.min(Math.max(left, right), Math.max(top, bottom))
 
-    drawLine(asteroid){
-        var line = new Phaser.Geom.Line(this.scene.ship.x, this.scene.ship.y, asteroid.x, asteroid.y);
-        this.g.lineStyle(2, this.DBG_LINE_COLOR);
-        this.g.strokeLineShape(line)
-    }
+        if (tMax < 0 || tMin > tMax || tMin > 1) return null
 
-    pointOnRect(x, y, minX, minY, maxX, maxY, validate) {
-        //assert minX <= maxX;
-        //assert minY <= maxY;
-        if (validate && (minX < x && x < maxX) && (minY < y && y < maxY)) 
-            //throw "Point " + [x,y] + " cannot be inside " + "the rectangle: " + [minX, minY] + " - " + [maxX, maxY] + ".";
-            return false
-        var midX = (minX + maxX) / 2;
-        var midY = (minY + maxY) / 2;
-        // if (midX - x == 0) -> m == ±Inf -> minYx/maxYx == x (because value / ±Inf = ±0)
-        var m = (midY - y) / (midX - x);
-    
-        if (x <= midX) { // check "left" side
-            var minXy = m * (minX - x) + y;
-            if (minY <= minXy && minXy <= maxY)
-                return {x: minX, y: minXy};
-        }
-    
-        if (x >= midX) { // check "right" side
-            var maxXy = m * (maxX - x) + y;
-            if (minY <= maxXy && maxXy <= maxY)
-                return {x: maxX, y: maxXy};
-        }
-    
-        if (y <= midY) { // check "top" side
-            var minYx = (minY - y) / m + x;
-            if (minX <= minYx && minYx <= maxX)
-                return {x: minYx, y: minY};
-        }
-    
-        if (y >= midY) { // check "bottom" side
-            var maxYx = (maxY - y) / m + x;
-            if (minX <= maxYx && maxYx <= maxX)
-                return {x: maxYx, y: maxY};
-        }
-    
-        // edge case when finding midpoint intersection: m = 0/0 = NaN
-        if (x === midX && y === midY) return {x: x, y: y};
-    
-        // Should never happen :) If it does, please tell me!
-        throw "Cannot find intersection for " + [x,y]  + " inside rectangle " + [minX, minY] + " - " + [maxX, maxY] + ".";
-    }    
-  }
+        const t = tMin < 0 ? tMax : tMin
+        return { x: x1 + dx * t, y: y1 + dy * t }
+    }
+}

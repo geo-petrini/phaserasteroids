@@ -30,21 +30,12 @@ export default class Asteroid extends Phaser.GameObjects.Sprite {
         }
 
         this.setRotation(Phaser.Math.FloatBetween(0, 1));
-        this.body.setCircle(Math.max(this.width, this.height) / 2); //collision bounds
-        this.body.updateBounds();
-
-        //this.setMass(this.type)
+        this.body.setCircle(Math.max(this.displayWidth, this.displayHeight) / 2);
 
         this.firstRound = true;
 
         this.config.scene.asteroidsGroup.add(this);
         this.config.scene.asteroidsArray.push(this);
-    }
-
-    setMass(type) {
-        if (type == 'BIG') { this.body.mass = 10 }
-        if (type == 'MEDIUM') { this.body.mass = 5 }
-        if (type == 'SMALL') { this.body.mass = 2 }
     }
 
     update() {
@@ -61,67 +52,17 @@ export default class Asteroid extends Phaser.GameObjects.Sprite {
         if (this.type == 'MEDIUM') { childType = 'SMALL' }
         if (this.type == 'SMALL') { childType = 'DUST' }
 
-        if (childType != 'DUST'){
+        if (childType != 'DUST') {
             var asteroid = new Asteroid({ scene: this.config.scene, key: this.config.key, x: this.x, y: this.y, type: childType });
         }
-        
-        // this._createSmokeFX();
-        // this._createFlameFX();
+
         fx.createSmokeFX(this.x, this.y, this.config.scene)
         fx.createFlameFX(this.x, this.y, this.config.scene)
-       
+
         if (this.type == 'BIG') {
-            // this._createBlastFX();
             fx.createBlastFX(this.x, this.y, this.config.scene)
-        }    
+        }
     }
-
-    _createSmokeFX(){
-        let emitterSmoke = this.config.scene.add.particles('smoke').createEmitter({
-            x: this.x,
-            y: this.y,
-            speed: { min: 1, max: 10 },
-            angle: { min: 0, max: 270 },
-            scale: { start: 0.5, end: 0 },
-            alpha: { start: 1, end: 0 },
-            blendMode: 'SCREEN',
-            active: true,
-            lifespan: 600, //milliseconds
-        });
-        emitterSmoke.explode();
-    }
-    _createFlameFX(){
-        let emitterFlame = this.config.scene.add.particles('flame').createEmitter({
-            x: this.x,
-            y: this.y,
-            speed: { min: 1, max: 10 },
-            angle: { min: 0, max: 270 },
-            scale: { start: 0.5, end: 1 },
-            alpha: { start: 0.5, end: 0 },
-            blendMode: 'SCREEN',
-            active: true,
-            lifespan: 600, //milliseconds
-        }); 
-        emitterFlame.explode();
-        this.config.scene.sounds['explosion_short'].play({'volume':this.config.scene.options.volume_explosions});
-    }    
-    _createBlastFX(){
-        let emitterBlast = this.config.scene.add.particles('blastwave').createEmitter({
-            x: this.x,
-            y: this.y,
-            speed: { min: 0, max: 0 },
-            angle: { min: 0, max: 270 },
-            scale: { start: 0.1, end: 0.8 },
-            alpha: { start: 0.5, end: 0 },
-            blendMode: 'SCREEN',
-            active: true,
-            lifespan: 600, //milliseconds
-        });
-        emitterBlast.explode();
-
-        this.config.scene.sounds['sbabaam'].play({'volume':this.config.scene.options.volume_explosions});
-        this.config.scene.sounds['asteroid_explosion_1'].play({'volume':this.config.scene.options.volume_explosions});
-    }      
 
     toString() {
         let str = 'Asteroid(';

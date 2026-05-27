@@ -8,11 +8,6 @@ class ShipConfigScene extends Phaser.Scene {
 
     preload() {
         this.canvas = this.sys.game.canvas;
-        this.load.scenePlugin({
-            key: 'rexuiplugin',
-            url: 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexuiplugin.min.js',
-            sceneKey: 'rexUI'
-        });
     }
 
     create() {
@@ -28,13 +23,13 @@ class ShipConfigScene extends Phaser.Scene {
         console.log('ship config ready');
 
         this.toggleMenuKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.O);
-    }    
+    }
 
     update(time, delta) {
         if (this.input.keyboard.checkDown(this.toggleMenuKey, 250)) {
             this.input.stopPropagation();
             this.scene.switch('GameScene');
-        }        
+        }
     }
 }
 export default ShipConfigScene;
