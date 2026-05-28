@@ -1,4 +1,4 @@
-import ShipEditor from '../sprites/shipeditor.js'
+import ShipEditor from '../editor/ShipEditor.js'
 
 class ShipConfigScene extends Phaser.Scene {
 

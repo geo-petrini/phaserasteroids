@@ -1,4 +1,4 @@
-import Ship from '../sprites/ship.js'
+import Ship from '../ship/Ship.js'
 import Bullet from '../sprites/bullet.js'
 import Asteroid from '../sprites/asteroid.js';
 

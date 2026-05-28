@@ -1,0 +1,4 @@
+[
+  { "id": "gun1",     "label": "Gun L1",    "w": 1, "h": 1, "color": "0xffaa44", "isTracking": false },
+  { "id": "trackgun", "label": "Track Gun", "w": 2, "h": 1, "color": "0xffaa44", "isTracking": true }
+]

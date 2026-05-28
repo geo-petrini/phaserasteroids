@@ -1,3 +1,5 @@
+import { registry } from '../components/index.js'
+
 class BootScene extends Phaser.Scene {
 
     constructor(test) {
@@ -40,8 +42,10 @@ class BootScene extends Phaser.Scene {
             text.destroy();
             console.log('load complete');
 
-            this._loadShip()
-            this.scene.start('ShipConfigScene');
+            registry.load().then(() => {
+                this._loadShip()
+                this.scene.start('ShipConfigScene');
+            })
         });
 
         this.load.image('background', 'assets/nebula.jpg');

@@ -1,0 +1,5 @@
+[
+  { "id": "gen1", "label": "Gen L1", "w": 1, "h": 1, "color": "0x4488ff", "energyGen": 2 },
+  { "id": "gen2", "label": "Gen L2", "w": 2, "h": 1, "color": "0x4488ff", "energyGen": 5 },
+  { "id": "gen3", "label": "Gen L3", "w": 3, "h": 1, "color": "0x4488ff", "energyGen": 8 }
+]
