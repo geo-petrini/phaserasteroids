@@ -36,13 +36,17 @@ export default class ShipTargeting {
   _updateTurretAngles(targets) {
     const shipX = this.shipRef.x
     const shipY = this.shipRef.y
+    const cos = Math.cos(this.shipRef.rotation)
+    const sin = Math.sin(this.shipRef.rotation)
 
     for (let i = 0; i < this.trackingWeapons.length; i++) {
       const w = this.trackingWeapons[i]
       const target = targets[i]
       if (!target) continue
-      const dx = target.x - shipX
-      const dy = target.y - shipY
+      const wx = shipX + (w.x * this.shipRef.scaleX) * cos - (w.y * this.shipRef.scaleX) * sin
+      const wy = shipY + (w.x * this.shipRef.scaleX) * sin + (w.y * this.shipRef.scaleX) * cos
+      const dx = target.x - wx
+      const dy = target.y - wy
       const desired = Math.atan2(dy, dx)
       const diff = Phaser.Math.Angle.Wrap(desired - w.turretAngle)
       const turnSpeed = 3 * (Math.PI / 180)

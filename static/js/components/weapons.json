@@ -28,6 +28,6 @@
     "bulletSize": "2x8",
     "bulletSpeed": 750,
     "bulletLifespan": 400,
-    "laserLength":100
+    "laserLength":400
   }
 ]
