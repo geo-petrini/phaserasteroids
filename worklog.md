@@ -127,6 +127,89 @@ Dipendenze: Phaser CDN, rexUI plugin (inutilizzato), dat.GUI (inutilizzato)
 - Anche le particelle degli emitter usavano scale fisse (`start: 1, end: 0.2`) indipendentemente dalla scala nave
 - **Fix**: tutti gli offset moltiplicati per `this.scaleX`, particle scale e speed scalate con `ps = this.scaleX`
 
+## Refactor 2026-05-28 — per-component weapon stats, shield/hull damage, energy wiring
+
+### Obiettivo
+- Ogni arma ha il proprio `fireInterval` ed `energyPerShot` gestiti da `WeaponComponent`
+- `ShipWeapons.fireAll()` delega a ogni `WeaponComponent.fire()` invece di `fireFixed`/`fireTracking` separati
+- Collisioni danneggiano prima gli scudi poi lo scafo
+- Scudo si ricarica consumando energia (1 energy/tick)
+- Generatori alimentano `energyGen` per la ricarica energia armi
+- Dati arma (`fireIntervall`, `energyUsage`) passati da JSON → ShipData → WeaponComponent
+
+### `js/ship/WeaponComponent.js`
+- `energyHb.decrease(1)` → `decrease(this.energyPerShot)` — ogni arma consuma il proprio `energyUsage` dal JSON (Gun L1: 5, Track Gun: 8)
+
+### `js/ship/ShipWeapons.js` — REWRITE
+- Crea array `this.weapons` di istanze `WeaponComponent` (una per posizione arma)
+- Espone `this.trackingWeapons` / `this.fixedWeapons` come filtri
+- Singolo metodo `fireAll()` itera su tutte le armi, ogni `WeaponComponent` gestisce il proprio cooldown (`lastFired` + `fireInterval`)
+
+### `js/ship/ShipHealth.js` — REWRITE
+- `damage(amount)`: assorbe con gli scudi prima, eccesso passa allo scafo
+- `rechargeShield(amount, energyHb)`: consuma 1 energia, restituisce `amount` scudo
+- `shield_hb.max_value` impostato da `shieldCapacity` (aggregato dei componenti scudo)
+
+### `js/ship/ShipTargeting.js` — REWRITE
+- Costruttore accetta `trackingWeapons` (array di `WeaponComponent`) invece di offset/turretAngles separati
+- `_updateTurretAngles()` scrive su `w.turretAngle` direttamente
+- `_drawTargetingLasers()` legge `w.x`, `w.y`, `w.turretAngle` dai weapon component
+
+### `js/ship/Ship.js`
+- Rimossi: `FIRE_INTERVAL`, `WEAPONS_BULLET_DISCHARGE`, `lastFired`
+- Aggiunti: `SHIELD_CAPACITY`, `SHIELD_RECHARGE` da config
+- Firing: `this.weapons.fireAll()` chiamato ogni frame con fire key (ogni arma si auto-gates)
+- Shield recharge timer nell'update loop
+- `ShipHealth` e `ShipTargeting` costruiti con nuovi parametri
+
+### `js/editor/ShipData.js`
+- Posizioni arma includono `fireIntervall` ed `energyUsage` dal componente JSON
+
+### `js/scenes/gamescene.js`
+- Passa `shieldCapacity` e `shieldRecharge` da `shipData` al config Ship
+
+## Refactor 2026-05-28 — per-weapon bullet pools
+
+### Obiettivo
+- Ogni `WeaponComponent` crea e gestisce il proprio `Phaser.Physics.Arcade.Group` di proiettili
+- `bulletsPool`, `bulletSpeed`, `bulletLifespan`, `bulletColor`, `bulletSize` letti da `weapons.json`
+- ShipWeapons e GameScene non possiedono più un unico group centralizzato
+- Ship.destroy() pulisce tutti i subsystem compresi i gruppi di proiettili
+- rebuildShip() verifica che i vecchi collider siano rimossi prima di crearne di nuovi
+
+### `js/sprites/bullet.js`
+- `fire()` accetta 5° parametro `opts = {}` con `{speed, lifespan}`
+- Usa `opts.speed || this.speed` per velocity, `opts.lifespan || 500` per lifespan
+- Rimossa assegnazione hardcoded `this.lifespan = 500`
+
+### `js/ship/WeaponComponent.js` — REWRITE
+- Importa `Bullet` per `classType` del group
+- Costruttore: salva `bulletsPool`, `bulletSpeed`, `bulletLifespan` da `offset`
+- Parsa `bulletColor` string → `Number` per `setTint()`
+- Parsa `bulletSize` "WxH" → `bulletScaleX/Y` per `setScale()`
+- Nuovo `createBulletGroup(scene)`: `scene.physics.add.group({ classType: Bullet, maxSize, runChildUpdate: true })`
+- `fire()`: rimuove parametro `bullets`, usa `this.group.get()`. Passa `{speed, lifespan}` opts a `bullet.fire()`. Applica tint e scale dopo fire.
+- Nuovo `destroy()`: distrugge `this.group`
+
+### `js/ship/ShipWeapons.js` — REWRITE
+- Rimossi `this.bullets`, `assignBullets()`
+- Costruttore chiama `_createBulletGroups()` internamente
+- `fireAll()`: non riceve più `bullets`
+- Nuovo `getBulletGroups()`: ritorna array dei gruppi di tutte le armi
+- Nuovo `destroy()`: itera `this.weapons`, chiama `w.destroy()`
+
+### `js/ship/Ship.js`
+- Nuovo override `destroy()`: pulisce thrusters, targeting, weapons, health → `super.destroy()`
+
+### `js/editor/ShipData.js`
+- Posizioni arma includono `bulletsPool`, `bulletSpeed`, `bulletLifespan`, `bulletColor`, `bulletSize`
+
+### `js/scenes/gamescene.js`
+- Rimossi: `import Bullet`, creazione `this.bullets` group, `assignBullets()`
+- Dopo `new Ship(def)`: `this.bulletGroups = this.ship.weapons.getBulletGroups()`
+- `createAsteroids()`: collider usa `this.bulletGroups` (array, Phaser accetta array di group)
+- `rebuildShip()`: non distrugge più `this.bullets`. Verifica vecchi collider con null-check prima di rimuoverli. Azzera `this.bulletGroups` prima di ricreare.
+
 ## Note su Phaser 4
 
 - `Phaser.Input.Keyboard.JustDown(key)` → se non funziona, usare `key.justDown`

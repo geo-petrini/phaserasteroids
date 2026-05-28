@@ -1,7 +1,0 @@
-[
-  { "id": "thrust_f1", "label": "Fwd L1", "w": 1, "h": 1, "color": "0xff6644", "accel": 20,  "particleColor": "0xff4444", "type": "forward" },
-  { "id": "thrust_f2", "label": "Fwd L2", "w": 2, "h": 1, "color": "0xff6644", "accel": 55,  "particleColor": "0xffff44", "type": "forward" },
-  { "id": "thrust_f3", "label": "Fwd L3", "w": 3, "h": 1, "color": "0xff6644", "accel": 70,  "particleColor": "0x4488ff", "type": "forward" },
-  { "id": "thrust_l1", "label": "Lat L1", "w": 1, "h": 1, "color": "0xff6644", "rotation": 20, "particleColor": "0xff4444", "type": "lateral" },
-  { "id": "thrust_l2", "label": "Lat L2", "w": 1, "h": 1, "color": "0xff6644", "rotation": 55, "particleColor": "0xffff44", "type": "lateral" }
-]

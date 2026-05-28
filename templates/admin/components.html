@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}COMPONENTS — ADMIN{% endblock %}
+{% block content %}
+<div class="head-row">
+  <h1>■ COMPONENT DATABASE</h1>
+</div>
+<p class="text-dim" style="margin-bottom:1rem">
+  EDIT SHIP COMPONENT DATA. CHANGES ARE WRITTEN DIRECTLY TO <code>js/components/*.json</code>.
+</p>
+
+{% for cat in categories %}
+<div class="card">
+  <h2 style="display:flex;align-items:center;justify-content:space-between">
+    <span>■ {{ cat.label }}</span>
+    <a class="btn btn-primary btn-sm" href="/admin/components/{{ cat.key }}/new">+ NEW</a>
+  </h2>
+  {% if cat.parts %}
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>LABEL</th>
+        <th>W</th><th>H</th><th>COLOR</th>
+        {% for ek in cat.extras_present %}
+        <th>{{ ek }}</th>
+        {% endfor %}
+        <th style="width:130px">ACTIONS</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for item in cat.parts %}
+      <tr>
+        <td><code>{{ item.id }}</code></td>
+        <td>{{ item.label }}</td>
+        <td>{{ item.w }}</td>
+        <td>{{ item.h }}</td>
+        <td><code>{{ item.color }}</code></td>
+        {% for ek in cat.extras_present %}
+        <td>{{ item.get(ek,'') }}</td>
+        {% endfor %}
+        <td>
+          <a class="btn btn-outline btn-sm" href="/admin/components/{{ cat.key }}/{{ item.id }}/edit">EDIT</a>
+          <form method="POST" action="/admin/components/{{ cat.key }}/{{ item.id }}/delete" style="display:inline">
+            <button class="btn btn-danger btn-sm" onclick="return confirm('DELETE {{ item.id }}?')">DEL</button>
+          </form>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p style="color:#555;padding:0.5rem 0;font-size:0.6rem">NO COMPONENTS IN THIS CATEGORY.</p>
+  {% endif %}
+</div>
+{% endfor %}
+{% endblock %}

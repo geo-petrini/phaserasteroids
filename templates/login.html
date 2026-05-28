@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}LOGIN — PHASER ASTEROIDS{% endblock %}
+{% block content %}
+<div class="card" style="max-width:400px;margin:3rem auto">
+  <h2>■ LOGIN</h2>
+  <form method="POST" action="/login">
+    <label>CALLSIGN
+      <input type="text" name="username" placeholder="PILOT NAME">
+    </label>
+    <label>ACCESS CODE
+      <input type="password" name="password" placeholder="********">
+    </label>
+    <div class="actions">
+      <button class="btn btn-primary" disabled>SIGN IN — COMING SOON</button>
+    </div>
+    <p style="margin-top:0.75rem;font-size:0.55rem;color:#555">
+      NO TRANSMITTER? <a href="/register">REGISTER</a>
+    </p>
+  </form>
+</div>
+{% endblock %}

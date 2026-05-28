@@ -1,6 +1,0 @@
-[
-  { "id": "cabin",       "label": "Cabin",        "w": 2, "h": 1, "color": "0xf0d060" },
-  { "id": "connector_s", "label": "Connector S",  "w": 1, "h": 1, "color": "0xf0d060" },
-  { "id": "connector_m", "label": "Connector M",  "w": 2, "h": 2, "color": "0xf0d060" },
-  { "id": "connector_l", "label": "Connector L",  "w": 3, "h": 3, "color": "0xf0d060" }
-]

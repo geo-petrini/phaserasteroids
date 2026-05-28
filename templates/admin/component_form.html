@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}{{ 'EDIT' if edit else 'NEW' }} COMPONENT — ADMIN{% endblock %}
+{% block content %}
+<div class="head-row">
+  <h1>■ {{ 'EDIT' if edit else 'NEW' }} COMPONENT</h1>
+</div>
+<p class="text-dim" style="margin-bottom:1rem">CATEGORY: <strong style="color:var(--fg-bright)">{{ meta.label }}</strong></p>
+
+<div class="card" style="max-width:520px">
+  <form method="POST" action="{{ '/admin/components/%s/%s/edit' % (meta.key, item.id) if edit else '/admin/components/%s/new' % meta.key }}">
+    {% set fields = ['id','label','w','h','color'] %}
+    {% set optional = ['accel','rotation','energyGen','recharge','capacity','isTracking','particleColor','type'] %}
+    {% set all_fields = fields + optional %}
+
+    {% for key in all_fields %}
+    <label>
+      {{ key }}
+      {% if key == 'isTracking' %}
+        <select name="{{ key }}">
+          <option value="false" {{ 'selected' if not item.get(key) }}>FALSE</option>
+          <option value="true" {{ 'selected' if item.get(key) == true }}>TRUE</option>
+        </select>
+      {% elif key in ('color','particleColor') %}
+        <input type="text" name="{{ key }}" value="{{ item.get(key,'') }}" placeholder="0xRRGGBB">
+      {% else %}
+        <input type="text" name="{{ key }}" value="{{ item.get(key,'') }}" placeholder="{{ 'NUMERIC' if key in ('w','h','accel','rotation','energyGen','recharge','capacity') else 'TEXT' }}">
+      {% endif %}
+      {% if key in fields %}
+        <div class="help">REQUIRED</div>
+      {% else %}
+        <div class="help">OPTIONAL</div>
+      {% endif %}
+    </label>
+    {% endfor %}
+
+    <div class="actions">
+      <button class="btn btn-primary">{{ 'UPDATE' if edit else 'CREATE' }}</button>
+      <a class="btn btn-outline" href="/admin/components">CANCEL</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

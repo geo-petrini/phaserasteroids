@@ -1,0 +1,32 @@
+[
+  {
+    "id": "gun1",
+    "label": "Gun L1",
+    "w": 1,
+    "h": 1,
+    "color": "0xffaa44",
+    "isTracking": false,
+    "energyUsage": 5,
+    "fireIntervall": 15,
+    "bulletsPool": 10,
+    "bulletColor": "0xaaaaff",
+    "bulletSize": "1x5",
+    "bulletSpeed": 1000,
+    "bulletLifespan": 500
+  },
+  {
+    "id": "trackgun",
+    "label": "Track Gun",
+    "w": 2,
+    "h": 1,
+    "color": "0xffaa44",
+    "isTracking": true,
+    "energyUsage": 8,
+    "fireIntervall": 30,
+    "bulletsPool": 5,
+    "bulletColor": "0xaaffbb",
+    "bulletSize": "2x4",
+    "bulletSpeed": 750,
+    "bulletLifespan": 400  
+  }
+]

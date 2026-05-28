@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}REGISTER — PHASER ASTEROIDS{% endblock %}
+{% block content %}
+<div class="card" style="max-width:400px;margin:3rem auto">
+  <h2>■ REGISTER</h2>
+  <form method="POST" action="/register">
+    <label>CALLSIGN
+      <input type="text" name="username" placeholder="PICK A NAME">
+    </label>
+    <label>COMMS FREQ
+      <input type="email" name="email" placeholder="PILOT@EXAMPLE.COM">
+    </label>
+    <label>ACCESS CODE
+      <input type="password" name="password" placeholder="********">
+    </label>
+    <label>CONFIRM CODE
+      <input type="password" name="confirm" placeholder="********">
+    </label>
+    <div class="actions">
+      <button class="btn btn-primary" disabled>TRANSMIT — COMING SOON</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

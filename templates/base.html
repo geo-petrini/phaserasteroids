@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}PHASER ASTEROIDS{% endblock %}</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<nav>
+  <a class="brand" href="/">PHASER ASTEROIDS</a>
+  <span class="spacer"></span>
+  <a href="/play">PLAY</a>
+  <a href="/admin/components">ADMIN</a>
+  <a href="/login">LOGIN</a>
+  <a href="/register">REGISTER</a>
+  <a href="/profile">PROFILE</a>
+</nav>
+<main>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="flash flash-{{ category if category in ('success','error') else 'success' }}">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+  {% block content %}{% endblock %}
+</main>
+</body>
+</html>

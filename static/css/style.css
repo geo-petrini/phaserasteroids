@@ -1,0 +1,326 @@
+/* ============================================================
+   PhaserAsteroids — pixel retro arcade styling
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+:root {
+  --bg:       #0a0a0a;
+  --bg-panel: #111122;
+  --fg:       #ffcc00;
+  --fg-dim:   #886600;
+  --fg-bright:#ffff88;
+  --cyan:     #00ffff;
+  --magenta:  #ff00ff;
+  --green:    #33ff33;
+  --red:      #ff3333;
+  --blue:     #4488ff;
+  --orange:   #ff8800;
+  --border:   #ffcc00;
+  --pixel:    'Press Start 2P', 'Courier New', monospace;
+  --main-font-size: 1rem;
+  --hero-font-size: 1.5rem;
+  --mini-font-size: 0.7rem;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--pixel);
+  font-size:  var(--main-font-size);
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  /* scan-line effect */
+  background-image: repeating-linear-gradient(
+    0deg,
+    rgba(0,0,0,0.15) 0px,
+    rgba(0,0,0,0.15) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+}
+
+a { color: var(--cyan); text-decoration: none; }
+a:hover { color: var(--fg-bright); text-shadow: 0 0 8px var(--cyan); }
+
+/* ---- Nav ---- */
+nav {
+  background: var(--bg-panel);
+  border-bottom: 3px solid var(--border);
+  padding: 0.75rem 1.5rem;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+nav .brand {
+  font-size: var(--main-font-size);
+  color: var(--fg-bright);
+  text-shadow: 0 0 6px var(--fg);
+  letter-spacing: 2px;
+}
+nav a {
+  font-size: var(--main-font-size);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+nav .spacer { flex: 1; }
+
+/* ---- Main ---- */
+main {
+  flex: 1;
+  padding: 1.5rem;
+  /* max-width: 960px; */
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* ---- Hero ---- */
+.hero {
+  text-align: center;
+  padding: 3rem 0 1.5rem;
+  border: 3px double var(--magenta);
+  background: var(--bg-panel);
+  margin-bottom: 2rem;
+  position: relative;
+}
+.hero::before {
+  content: '◆ ◆ ◆ ◆ ◆ ◆ ◆ ◆ ◆ ◆';
+  display: block;
+  font-size: var(--main-font-size);
+  color: var(--magenta);
+  letter-spacing: 6px;
+  margin-bottom: 0.5rem;
+}
+.hero h1 {
+  font-size: var(--hero-font-size);
+  color: var(--fg-bright);
+  text-shadow: 0 0 12px var(--fg), 0 0 24px var(--orange);
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  margin-bottom: 0.75rem;
+}
+.hero p {
+  color: var(--fg-dim);
+  max-width: 520px;
+  margin: 0 auto 1.5rem;
+  font-size: var(--main-font-size);
+  line-height: 1.8;
+}
+.btn-play {
+  display: inline-block;
+  background: var(--green);
+  color: #000;
+  font-family: var(--pixel);
+  font-size: var(--main-font-size);
+  padding: 0.6rem 2rem;
+  border: 3px solid #000;
+  box-shadow: 0 0 12px var(--green), inset 0 0 8px rgba(0,0,0,0.3);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: all 0.1s;
+}
+.btn-play:hover {
+  background: #66ff66;
+  box-shadow: 0 0 20px var(--green);
+  text-decoration: none;
+}
+
+/* ---- Cards ---- */
+.card {
+  background: var(--bg-panel);
+  border: 2px solid var(--border);
+  padding: 1rem 1.25rem;
+  margin-bottom: 1rem;
+}
+.card h2 {
+  font-size: var(--main-font-size);
+  color: var(--fg-bright);
+  text-shadow: 0 0 6px var(--fg);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 0.5rem;
+  border-bottom: 1px solid var(--fg-dim);
+  padding-bottom: 0.4rem;
+}
+.card p {
+  font-size: var(--main-font-size);
+  color: var(--fg-dim);
+  line-height: 1.8;
+}
+
+/* ---- Feature grid (index) ---- */
+.feature-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+.feature-grid .card {
+  border-color: var(--cyan);
+}
+.feature-grid .card:nth-child(2) { border-color: var(--magenta); }
+.feature-grid .card:nth-child(3) { border-color: var(--green); }
+.feature-grid .card:nth-child(4) { border-color: var(--orange); }
+
+/* ---- Tables ---- */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--main-font-size);
+}
+th, td {
+  padding: 0.4rem 0.5rem;
+  text-align: left;
+  border: 1px solid #333366;
+}
+th {
+  background: #1a1a3a;
+  color: var(--cyan);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+td {
+  color: var(--fg);
+}
+td code {
+  font-family: var(--pixel);
+  font-size: var(--main-font-size);
+  color: var(--green);
+}
+
+/* ---- Forms ---- */
+form label {
+  display: block;
+  margin-top: 0.6rem;
+  font-size: var(--main-font-size);
+  color: var(--cyan);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+form input, form select, form textarea {
+  width: 100%;
+  padding: 0.4rem 0.5rem;
+  border: 2px solid #333366;
+  background: #0a0a1a;
+  color: var(--fg);
+  font-family: var(--pixel);
+  font-size: var(--main-font-size);
+  outline: none;
+}
+form input:focus, form select:focus {
+  border-color: var(--cyan);
+  box-shadow: 0 0 8px var(--cyan);
+}
+form .help {
+  font-size: var(--main-font-size);
+  color: #555;
+  margin-top: 0.15rem;
+  text-transform: none;
+  letter-spacing: 0;
+}
+form .actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+/* ---- Buttons ---- */
+.btn {
+  display: inline-block;
+  padding: 0.4rem 0.8rem;
+  font-family: var(--pixel);
+  font-size:var(--main-font-size);
+  border: 2px solid;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-decoration: none;
+  transition: all 0.1s;
+}
+.btn-primary {
+  background: #000;
+  color: var(--cyan);
+  border-color: var(--cyan);
+  box-shadow: 0 0 6px var(--cyan);
+}
+.btn-primary:hover {
+  background: var(--cyan);
+  color: #000;
+  text-decoration: none;
+}
+.btn-danger {
+  background: #000;
+  color: var(--red);
+  border-color: var(--red);
+}
+.btn-danger:hover {
+  background: var(--red);
+  color: #000;
+  text-decoration: none;
+}
+.btn-outline {
+  background: transparent;
+  color: var(--fg);
+  border-color: var(--fg-dim);
+}
+.btn-outline:hover {
+  border-color: var(--fg);
+  text-decoration: none;
+}
+.btn-sm {
+  padding: 0.25rem 0.5rem;
+  font-size: var(--main-font-size);
+}
+
+/* ---- Flash messages ---- */
+.flash {
+  padding: 0.5rem 0.75rem;
+  border: 2px solid;
+  margin-bottom: 0.75rem;
+  font-size: var(--main-font-size);
+  text-transform: uppercase;
+}
+.flash-success { background: #0a1a0a; color: var(--green); border-color: var(--green); }
+.flash-error   { background: #1a0a0a; color: var(--red);   border-color: var(--red); }
+
+/* ---- Play page (game container) ---- */
+#game-container {
+  width: 100%;
+  height: calc(100vh - 48px);
+  margin: -1.5rem;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+/* ---- Placeholder ---- */
+.placeholder-box {
+  border: 2px dashed #333;
+  padding: 2rem;
+  text-align: center;
+  color: #555;
+  font-size: var(--main-font-size);
+}
+.placeholder-box p { margin-bottom: 0.5rem; }
+
+/* ---- Admin heading row ---- */
+.head-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+.head-row h1 {
+  font-size: var(--main-font-size);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--fg-bright);
+  text-shadow: 0 0 8px var(--fg);
+}
+
+/* small text utility */
+.text-dim { color: var(--fg-dim); font-size: var(--main-font-size); }
