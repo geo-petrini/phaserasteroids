@@ -44,7 +44,7 @@ export function createBlastFX(x, y, scene) {
 
 
 export function createTrail(source, scene) {
-    var emitterTrail = scene.add.particles(0, 0, 'particle',
+    var emitterTrail = scene.add.particles(0, 0, 'particle', {
             speed: 100,
             emitting: false,
             lifespan: {
