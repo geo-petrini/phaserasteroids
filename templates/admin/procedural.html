@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}PROCEDURAL — ADMIN{% endblock %}
+{% block content %}
+<div class="head-row">
+  <h1>■ PROCEDURAL WORLD PARAMS</h1>
+</div>
+<p class="text-dim" style="margin-bottom:1rem">
+  TUNE PARAMETERS FOR <code>/api/world</code> GENERATION. CHANGES AFFECT NEW WORLDS.
+</p>
+
+<div class="card" style="max-width:640px">
+  <form method="POST">
+    <h3>■ WORLD</h3>
+    <label>Width <input type="number" name="world_width" value="{{ cfg.world.width }}"></label>
+    <label>Height <input type="number" name="world_height" value="{{ cfg.world.height }}"></label>
+
+    <h3>■ ASTEROIDS</h3>
+    <label>Count <input type="number" name="asteroid_count" value="{{ cfg.asteroids.count }}"></label>
+    <label>Min Radius <input type="number" step="0.1" name="asteroid_minRadius" value="{{ cfg.asteroids.minRadius }}"></label>
+    <label>Max Radius <input type="number" step="0.1" name="asteroid_maxRadius" value="{{ cfg.asteroids.maxRadius }}"></label>
+    <label>Min Speed <input type="number" step="0.1" name="asteroid_minSpeed" value="{{ cfg.asteroids.minSpeed }}"></label>
+    <label>Max Speed <input type="number" step="0.1" name="asteroid_maxSpeed" value="{{ cfg.asteroids.maxSpeed }}"></label>
+    <label>Color Saturation <input type="number" min="0" max="100" name="asteroid_colorSat" value="{{ cfg.asteroids.colorSat }}"></label>
+    <label>Color Lightness <input type="number" min="0" max="100" name="asteroid_colorLight" value="{{ cfg.asteroids.colorLight }}"></label>
+    <label>Break Count <input type="number" name="asteroid_breakCount" value="{{ cfg.asteroids.breakCount }}"></label>
+    <label>Child Radius Factor <input type="number" step="0.1" min="0" max="1" name="asteroid_childRadiusFactor" value="{{ cfg.asteroids.childRadiusFactor }}"></label>
+
+    <h3>■ STARS</h3>
+    <label>Count <input type="number" name="star_count" value="{{ cfg.stars.count }}"></label>
+    <label>Parallax Layers <input type="number" name="star_parallaxLayers" value="{{ cfg.stars.parallaxLayers }}"></label>
+
+    <h3>■ NEBULA</h3>
+    <label>Count <input type="number" name="nebula_count" value="{{ cfg.nebula.count }}"></label>
+
+    <h3>■ PLANETS</h3>
+    <label>Count <input type="number" name="planet_count" value="{{ cfg.planets.count }}"></label>
+
+    <h3>■ GALAXIES</h3>
+    <label>Count <input type="number" name="galaxy_count" value="{{ cfg.galaxies.count }}"></label>
+
+    <h3>■ EYES</h3>
+    <label>Count <input type="number" name="eye_count" value="{{ cfg.eyes.count }}"></label>
+
+    <div class="actions">
+      <button class="btn btn-primary">SAVE</button>
+      <a class="btn btn-outline" href="/admin/components">BACK TO COMPONENTS</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

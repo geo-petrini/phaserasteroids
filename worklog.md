@@ -210,6 +210,199 @@ Dipendenze: Phaser CDN, rexUI plugin (inutilizzato), dat.GUI (inutilizzato)
 - `createAsteroids()`: collider usa `this.bulletGroups` (array, Phaser accetta array di group)
 - `rebuildShip()`: non distrugge più `this.bullets`. Verifica vecchi collider con null-check prima di rimuoverli. Azzera `this.bulletGroups` prima di ricreare.
 
+## Piano — Grafica 100% Procedurale (DA IMPLEMENTARE)
+
+### Obiettivo
+Eliminare tutti gli asset esterni (spritesheet, immagini, atlas) e generare ogni texture via codice usando Graphics + Canvas API.
+
+### Nuovi file
+
+#### `js/procedural/RNG.js`
+Seme RNG deterministico per texture basate su seed.
+
+#### `js/procedural/PerlinNoise.js`
+Value noise 2D + interpolazione cosine. Usato per versione A della nebula.
+
+#### `js/procedural/ProceduralAssets.js`
+Generatore principale. Metodo statico `generate(scene)` chiamato dal bootscene.
+
+### Texture da generare
+
+| Texture | Dim | Tecnica |
+|---------|-----|---------|
+| `bullet_gun1` | 1×5 (da JSON) | Graphics fillRect + dettaglio punta |
+| `bullet_trackgun` | 2×4 (da JSON) | Graphics fillRect, più largo |
+| `particle_flame` | 16×8 | Graphics pixel-art fiamma a goccia |
+| `particle_smoke` | 12×12 | Graphics cerchio sfumato |
+| `particle_blast` | 32×32 | Graphics cerchio + 8 raggi |
+| `asteroid_1..4` | 96×96 | Graphics poligono irregolare (12 vertici, RNG con seed) |
+| `stars_tile` | 256×256 | Canvas 2D puntini bianchi, tileable |
+| `stars_bright` | 256×256 | Canvas 2D stelle luminose rare, tileable |
+| `nebula_a` | 512×512 | Canvas 2D + Perlin noise 4 ottave, color mapping |
+| `nebula_b` | 512×512 | Graphics blob semitrasparenti ADD |
+| `planet_*` (×5) | 64×64 | Graphics cerchio + bande/cratere/swirl |
+| `galaxy` | 128×128 | Graphics spirale ellittica + puntini |
+| `eye` | 32×16 | Graphics ellisse + pupilla |
+| `ship_fallback` | 48×48 | Graphics triangolo (quando nessuna custom ship) |
+
+### File da modificare
+
+- `bootscene.js` — rimuovere tutti i `this.load.image/spritesheet/atlas`, tenere solo audio. Chiamare `ProceduralAssets.generate(this)` dopo `registry.load()`
+- `sprites/bullet.js` — texture fallback, WeaponComponent imposta texture specifica via `bullet.setTexture()`
+- `sprites/asteroid.js` — REWRITE: rimuovere `this.play()`, ruotare in `update()`, texture statica
+- `scenes/gamescene.js` — 4 layer parallasse (nebula A, nebula B, stars back, stars front), pianeti/eye con scrollFactor, rimuovere `anims.create` asteroidi
+- `sprites/fx.js` — sostituire `'smoke'/'flame'/'blastwave'` con `'particle_smoke'/'particle_flame'/'particle_blast'`
+- `ship/ShipThrusters.js` — `'smoke'` → `'particle_flame'`, aggiungere `tint: t.color`
+- `ship/WeaponComponent.js` — dopo `group.get()`: `bullet.setTexture(\`bullet_$\{weaponId\}\`)`
+- `editor/ShipData.js` — passare `weaponId` nelle weapon positions
+
+### Asset da eliminare
+`space.png` + `space.json`, `asteroid1-4.png`, `nebula.jpg`, `stars.png`, `smoke.png`, `blastwave1.png`, `muzzleflash7.png`
+
+### Parallasse layers
+| Layer | Texture | scrollFactor | Vel paral |
+|-------|---------|-------------|-----------|
+| Nebula A | tileSprite `nebula_a` | 0 | 0.05× |
+| Nebula B | tileSprite `nebula_b` | 0 | 0.08× |
+| Stars back | tileSprite `stars_tile` | 0 | 0.2× |
+| Stars front | tileSprite `stars_bright` | 0 | 0.5× |
+| Pianeti (×7) | image `planet_*` | 0.6 | auto |
+| Galaxy | image `galaxy` | 0.6 | auto + tween |
+| Eyes (×8) | image `eye` | 0.8 | auto |
+
+### Ship custom texture
+TextureGenerator.js è già procedurale (Graphics + generateTexture). Non toccare.
+
+## Implementazione 2026-05-28 — Server world manifest + client procedural assets
+
+### Obiettivo
+- Server genera mondo JSON con posizioni/seeds per asteroidi, pianeti, stelle, nebulose, galassie, occhi
+- Client genera tutte le texture via Graphics (nessun asset esterno)
+- Sessioni salvabili/caricabili su server
+- Admin UI per parametri di generazione
+
+### Nuovi file
+
+#### `config/procedural.json`
+Parametri di default per generazione mondo (35 valori): conteggio asteroidi (80), min/max radii, velocità, tinte; conteggio stelle (400) e layers parallasse (2); nebulose (3) con palette colore; pianeti (4); galassie (2); occhi (6); dimensioni mondo (4096×4096).
+
+#### `modules/procedural.py`
+`generate_world(seed=...)` → manifest JSON deterministico:
+- 80 asteroidi con x, y, vx, vy, radius, hue, sat, light, seed (per texture RNG)
+- 2 layers stelle con x, y, radius, brightness
+- 3 nebulose con x, y, radius, palette, seed
+- 4 pianeti con x, y, radius, palette, seed
+- 2 galassie con x, y, radius, seed
+- 6 occhi con x, y, radius, seed
+- `save_session/load_session/list_sessions` → JSON file in `data/sessions/`
+
+#### `static/js/procedural/RNG.js`
+Mulberry32 PRNG deterministico — `next()`, `nextInt(min, max)`, `nextFloat(min, max)`, `pick(arr)`. Stesso seed → stessa sequenza.
+
+#### `static/js/procedural/ProceduralAssets.js`
+`generateBase(scene)` — texture sempre disponibili:
+- `ship-fallback` (32×32 triangolo)
+- `bullet` (8×8 cerchio bianco)
+- `smoke`/`blastwave`/`flame`/`particle` (cerchi colorati)
+
+`generateWorld(scene, manifest)` — texture da manifest:
+- `stars_X` (canvas per layer con puntini in posizioni)
+- `nebula_X` (canvas con radial gradients da palette)
+- `planet_X` (canvas con bande ellittiche)
+- `galaxy_X` (canvas con spirale di puntini)
+- `eye_X` (Graphics: bianco → nero → pupilla)
+- `asteroid_X` (Graphics: poligono irregolare 7-13 vertici con hue/sat/light)
+
+### File modificati
+
+#### `routes/api.py`
+Aggiunti endpoint:
+- `GET /api/world?seed=` — genera e ritorna manifest JSON
+- `POST /api/sessions` — salva stato gioco, ritorna session ID
+- `GET /api/sessions/<id>` — carica sessione
+- `GET /api/sessions` — lista sessioni
+
+#### `routes/admin.py`
+- Aggiunto `GET/POST /admin/procedural` — form per editare tutti i parametri in `procedural.json`
+- Aggiunto `GET /admin/sessions` — lista sessioni salvate
+
+#### `templates/admin/procedural.html`
+Nuovo: form retro-styled con campi per world, asteroidi, stelle, nebulose, pianeti, galassie, occhi.
+
+#### `templates/admin/sessions.html`
+Nuovo: tabella sessioni con ID e timestamp.
+
+#### `templates/base.html`
+Nav links: COMPONENTS → PROCEDURAL → SESSIONS
+
+#### `static/js/scenes/bootscene.js`
+- Rimossi: `load.image` (background, stars), `load.atlas` (space), `load.spritesheet` (asteroid1-4)
+- Mantenuti: `load.audio` (suoni)
+- `ProceduralAssets.generateBase(this)` chiamato subito in preload
+- `_loadWorld()`: fetch `/api/world`, `ProceduralAssets.generateWorld(this, manifest)`, manifest salvato in registry
+- Flusso: generateBase → audio load → fetch world → registry.load → start ShipConfigScene
+
+#### `static/js/scenes/gamescene.js`
+- `WORLD_WIDTH/HEIGHT` da manifest
+- `createBackground()`: nebulose, pianeti, galassie (con tween rotazione), occhi, star layers
+- `createAsteroids()`: usa manifest data, nessuna animazione
+- Ship default texture: `'ship-fallback'`
+- Rimosse animazioni asteroidi, `anims.create`, `space` atlas frames
+
+#### `static/js/sprites/bullet.js`
+- Texture `'space'/'blaster'` → `'bullet'`
+
+#### `static/js/sprites/asteroid.js`
+- Rimosso `this.play(config.key)` — texture statica
+
+#### `static/js/sprites/fx.js`
+- `createTrail()`: `'space'/'blue'` → `'particle'`
+
+## Valutazione — Server-side generation
+
+### Opzione A — World Manifest (ibrida, consigliata)
+
+Server genera solo strutture descrittive (posizioni, seed, tipi) come JSON. Client genera texture via Graphics come già pianificato, ma ora con seed deterministici.
+
+```
+SERVER (al new game)                                      CLIENT
+┌──────────────────────────────┐                          ┌──────────────────────────┐
+│ RNG(seed) → posizioni        │── GET /api/world ───►   │ ProceduralAssets         │
+│ asteroidi, pianeti,          │   { seed: 42,           │   .generate(scene,       │
+│ stelle, galassia, ...        │     planets: [...],     │     manifest)            │
+│ seeds per texture            │     asteroidSeeds: [...],│                          │
+│ (asteroidi, pianeti)         │     ...                  │   → texture da seed      │
+│                              │   }                     │   → oggetti in posizioni │
+│ NO immagini                  │   ≈2KB JSON             │                          │
+└──────────────────────────────┘                          └──────────────────────────┘
+```
+
+**Pro:** nessuna dipendenza server (no Pillow), payload minimo, stessa generazione texture già pianificata, partite deterministiche (stessi seed → stesso mondo), abilita multiplayer/replay, sviluppo veloce.
+
+**Contro:** client fa comunque generazione texture (istantanea con Graphics).
+
+### Opzione B — Server PIL (tutto server)
+
+Server genera immagini vere via Pillow, servite come PNG via Flask. Client solo caricamento texture.
+
+**Pro:** client non genera niente, logica centralizzata.
+
+**Contro:** dipendenza Pillow pesante, ~300KB texture da scaricare per sessione (lento), non può tintare particelle thruster per-componente senza rigenerare texture, server load alto, codice Python + JS da mantenere in parallelo.
+
+### Opzione C — Pixel JSON (thin client puro)
+
+Server calcola pixel-per-pixel, invia come array. Client solo `putImageData`.
+
+**Pro:** client massimamente sottile, sganciato da Phaser.
+
+**Contro:** payload enorme (~320KB pixel grezzi per sessione), parsing JSON lento, putImageData non veloce su device deboli, compressione base64 tanto vale usare PNG. È reimplementare un formato immagine via JSON.
+
+### Raccomandazione: Opzione A
+
+Server aggiunge endpoint `POST /sessions` o `GET /api/world`. Client chiama fetch, riceve manifest, ProceduralAssets.generate(scene, manifest) usa seed del manifest. Il piano grafica procedurale rimane identico, si aggiungono solo:
+- `routes/api.py` — endpoint `/api/world`
+- `ProceduralAssets.generate(scene, manifest)` — parametri seed invece di Math.random()
+
 ## Note su Phaser 4
 
 - `Phaser.Input.Keyboard.JustDown(key)` → se non funziona, usare `key.justDown`

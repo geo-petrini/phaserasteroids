@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}SESSIONS — ADMIN{% endblock %}
+{% block content %}
+<div class="head-row">
+  <h1>■ SAVED SESSIONS</h1>
+</div>
+<div class="card">
+  {% if sessions %}
+  <table>
+    <thead>
+      <tr>
+        <th>SESSION ID</th>
+        <th>MODIFIED</th>
+        <th>ACTIONS</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for s in sessions %}
+      <tr>
+        <td><code>{{ s.id }}</code></td>
+        <td>{{ s.modified | round | int | timestamp_to_date if False else s.modified }}</td>
+        <td><a class="btn btn-outline btn-sm" href="/api/sessions/{{ s.id }}">VIEW JSON</a></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p style="color:#555;padding:0.5rem 0;font-size:0.6rem">NO SESSIONS SAVED YET.</p>
+  {% endif %}
+</div>
+{% endblock %}

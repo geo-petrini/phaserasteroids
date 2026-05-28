@@ -1,0 +1,57 @@
+{
+  "_comment": "Tunable parameters for procedural world generation — edit via /admin/procedural",
+  "world": {
+    "width": 4096,
+    "height": 4096
+  },
+  "asteroids": {
+    "count": 80,
+    "minRadius": 8,
+    "maxRadius": 48,
+    "minSpeed": 20,
+    "maxSpeed": 80,
+    "colorHues": [0, 30, 60, 120, 180, 240, 300, 360],
+    "colorSat": 50,
+    "colorLight": 60,
+    "breakCount": 3,
+    "childRadiusFactor": 0.6
+  },
+  "stars": {
+    "count": 400,
+    "parallaxLayers": 2,
+    "minRadius": 1,
+    "maxRadius": 3
+  },
+  "nebula": {
+    "count": 3,
+    "minRadius": 120,
+    "maxRadius": 280,
+    "palettes": [
+      ["#440066", "#8800aa", "#cc44ff"],
+      ["#003366", "#0066aa", "#44aaff"],
+      ["#330033", "#660066", "#aa44aa"],
+      ["#663300", "#aa6600", "#ffaa44"]
+    ]
+  },
+  "planets": {
+    "count": 4,
+    "minRadius": 30,
+    "maxRadius": 80,
+    "palettes": [
+      ["#448844", "#66aa66", "#88cc88"],
+      ["#aa6644", "#cc8866", "#eeaa88"],
+      ["#4444aa", "#6666cc", "#8888ee"],
+      ["#aa4444", "#cc6666", "#ee8888"]
+    ]
+  },
+  "galaxies": {
+    "count": 2,
+    "minRadius": 40,
+    "maxRadius": 100
+  },
+  "eyes": {
+    "count": 6,
+    "minRadius": 6,
+    "maxRadius": 14
+  }
+}

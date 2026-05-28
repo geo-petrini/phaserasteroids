@@ -5,7 +5,6 @@ export default class Asteroid extends Phaser.GameObjects.Sprite {
 
         config.scene.physics.world.enable(this);
         config.scene.add.existing(this);
-        this.play(config.key)
 
         this.config = config;
         this.type = config.type;

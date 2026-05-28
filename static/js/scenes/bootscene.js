@@ -1,4 +1,5 @@
 import { registry } from '../components/index.js'
+import ProceduralAssets from '../procedural/ProceduralAssets.js'
 
 class BootScene extends Phaser.Scene {
 
@@ -30,6 +31,8 @@ class BootScene extends Phaser.Scene {
             }
         )
 
+        ProceduralAssets.generateBase(this);
+
         this.load.on('progress', (value) => {
             progress.clear();
             progress.fillStyle(0xffffff, 1);
@@ -42,23 +45,13 @@ class BootScene extends Phaser.Scene {
             text.destroy();
             console.log('load complete');
 
-            registry.load().then(() => {
-                this._loadShip()
-                this.scene.start('ShipConfigScene');
+            this._loadWorld().then(() => {
+                registry.load().then(() => {
+                    this._loadShip()
+                    this.scene.start('ShipConfigScene');
+                })
             })
         });
-
-        this.load.image('background', 'assets/nebula.jpg');
-        this.load.image('stars', 'assets/stars.png');
-        this.load.atlas('space', 'assets/space.png', 'assets/space.json');
-        this.load.spritesheet('asteroid1-sheet', 'assets/asteroid1.png', { frameWidth: 96, frameHeight: 96 });
-        this.load.spritesheet('asteroid2-sheet', 'assets/asteroid2.png', { frameWidth: 96, frameHeight: 96 });
-        this.load.spritesheet('asteroid3-sheet', 'assets/asteroid3.png', { frameWidth: 96, frameHeight: 96 });
-        this.load.spritesheet('asteroid4-sheet', 'assets/asteroid4.png', { frameWidth: 64, frameHeight: 64 });
-        this.load.image('smoke', 'assets/smoke.png');
-        this.load.image('blastwave', 'assets/blastwave1.png');
-        this.load.image('flame', 'assets/muzzleflash7.png');
-        // this.load.image('ship-big', 'assets/ship-upscaled.png');
 
         this.load.audio('laser_single', ['sounds/laser_single.wav']);
         this.load.audio('sbabaam', ['sounds/sbabaam.wav']);
@@ -67,14 +60,22 @@ class BootScene extends Phaser.Scene {
         this.cameras.main.fadeOut(150);
     }
 
-    /*
-    ship is saved in localStorage but then loaded in global game registry
-    */
+    async _loadWorld() {
+        try {
+            const resp = await fetch('/api/world');
+            const manifest = await resp.json();
+            this.registry.set('worldManifest', manifest);
+            ProceduralAssets.generateWorld(this, manifest);
+            console.log('world generated', manifest);
+        } catch (err) {
+            console.error('failed to load world', err);
+        }
+    }
+
     _loadShip(){
         const saved = localStorage.getItem('phaserAsteroidsShip')
         if (saved) {
             const data = JSON.parse(saved)
-            //registry is an instance of the global Game https://docs.phaser.io/phaser/concepts/data-manager#game-data-manager
             this.registry.set('shipData', data)
             this.registry.set('shipDataVersion', 1)
         }

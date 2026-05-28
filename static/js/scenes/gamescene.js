@@ -23,9 +23,15 @@ class GameScene extends Phaser.Scene {
     create() {
         console.log('gamescene create');
 
-        this.WORLD_WIDTH = 8000;
-        this.WORLD_HEIGHT = 8000;
-        this.MAX_ASTEROIDS = 80;
+        this.manifest = this.registry.get('worldManifest');
+        if (!this.manifest) {
+            console.error('no world manifest');
+            return;
+        }
+
+        this.WORLD_WIDTH = this.manifest.world.width;
+        this.WORLD_HEIGHT = this.manifest.world.height;
+        this.MAX_ASTEROIDS = this.manifest.asteroids.length;
         this.ASTEROIDS_INITIALIZED = false;
         this.MENU_INITIALIZED = false;
         this.cameraZoomIndex = 0;
@@ -51,33 +57,51 @@ class GameScene extends Phaser.Scene {
     }
 
     createBackground() {
-        this.bg = this.add.tileSprite(0, 0, this.WORLD_WIDTH, this.WORLD_HEIGHT, 'background').setScrollFactor(0);
-
-        this.add.image(512, 680, 'space', 'blue-planet').setOrigin(0).setScrollFactor(0.6);
-        this.add.image(2833, 1246, 'space', 'brown-planet').setOrigin(0).setScrollFactor(0.6);
-        this.add.image(3875, 531, 'space', 'sun').setOrigin(0).setScrollFactor(0.6);
-        var galaxy = this.add.image(5345 + 1024, 327 + 1024, 'space', 'galaxy').setBlendMode(1).setScrollFactor(0.6);
-        this.add.image(908, 3922, 'space', 'gas-giant').setOrigin(0).setScrollFactor(0.6);
-        this.add.image(3140, 2974, 'space', 'brown-planet').setOrigin(0).setScrollFactor(0.6).setScale(0.8).setTint(0x882d2d);
-        this.add.image(6052, 4280, 'space', 'purple-planet').setOrigin(0).setScrollFactor(0.6);
-
-        for (var i = 0; i < 8; i++) {
-            this.add.image(Phaser.Math.Between(0, this.WORLD_WIDTH), Phaser.Math.Between(0, this.WORLD_HEIGHT), 'space', 'eyes').setBlendMode(1).setScrollFactor(0.8);
+        if (this.manifest.nebula) {
+            for (let i = 0; i < this.manifest.nebula.length; i++) {
+                const n = this.manifest.nebula[i];
+                this.add.image(n.x, n.y, `nebula_${i}`).setScrollFactor(0.3).setAlpha(0.6);
+            }
         }
 
-        this.stars = this.add.tileSprite(0, 0, this.WORLD_WIDTH, this.WORLD_HEIGHT, 'stars').setScrollFactor(0);
+        if (this.manifest.planets) {
+            for (let i = 0; i < this.manifest.planets.length; i++) {
+                const p = this.manifest.planets[i];
+                this.add.image(p.x, p.y, `planet_${i}`).setScrollFactor(0.6);
+            }
+        }
 
-        this.tweens.add({
-            targets: galaxy,
-            angle: 360,
-            duration: 100000,
-            ease: 'Linear',
-            loop: -1
-        });
+        if (this.manifest.galaxies) {
+            for (let i = 0; i < this.manifest.galaxies.length; i++) {
+                const g = this.manifest.galaxies[i];
+                const galaxy = this.add.image(g.x, g.y, `galaxy_${i}`).setBlendMode(1).setScrollFactor(0.6);
+                this.tweens.add({
+                    targets: galaxy,
+                    angle: 360,
+                    duration: 100000,
+                    ease: 'Linear',
+                    loop: -1
+                });
+            }
+        }
+
+        if (this.manifest.eyes) {
+            for (let i = 0; i < this.manifest.eyes.length; i++) {
+                const e = this.manifest.eyes[i];
+                this.add.image(e.x, e.y, `eye_${i}`).setBlendMode(1).setScrollFactor(0.8);
+            }
+        }
+
+        if (this.manifest.stars) {
+            for (let li = 0; li < this.manifest.stars.length; li++) {
+                const factor = 0.2 + li * 0.3;
+                this.add.tileSprite(0, 0, this.WORLD_WIDTH, this.WORLD_HEIGHT, `stars_${li}`).setScrollFactor(0).setAlpha(1 - li * 0.3);
+            }
+        }
     }
 
     createShip(shipData) {
-        const def = { scene: this, key: 'ship', texture: 'space', x: this.WORLD_WIDTH / 2, y: this.WORLD_HEIGHT / 2, keys: this.player_keys }
+        const def = { scene: this, key: 'ship', texture: 'ship-fallback', x: this.WORLD_WIDTH / 2, y: this.WORLD_HEIGHT / 2, keys: this.player_keys }
 
         if (shipData.textureKey && this.textures.exists(shipData.textureKey)) {
             def.texture = shipData.textureKey
@@ -127,20 +151,13 @@ class GameScene extends Phaser.Scene {
     }
 
     createAsteroids() {
-        this.anims.create({ key: 'asteroid1-anim', frames: this.anims.generateFrameNumbers('asteroid1-sheet', { start: 0, end: 24 }), frameRate: 20, repeat: -1 });
-        this.anims.create({ key: 'asteroid2-anim', frames: this.anims.generateFrameNumbers('asteroid2-sheet', { start: 0, end: 24 }), frameRate: 20, repeat: -1 });
-        this.anims.create({ key: 'asteroid3-anim', frames: this.anims.generateFrameNumbers('asteroid3-sheet', { start: 0, end: 24 }), frameRate: 20, repeat: -1 });
-        this.anims.create({ key: 'asteroid4-anim', frames: this.anims.generateFrameNumbers('asteroid4-sheet', { start: 0, end: 23 }), frameRate: 20, repeat: -1 });
-
         this.asteroidsGroup = this.physics.add.group();
 
         console.log('asteroidsGroup: ' + this.asteroidsGroup);
 
-        for (var i = 0; i < this.MAX_ASTEROIDS; i++) {
-            let asteroidKey = 'asteroid' + Phaser.Math.RND.integerInRange(1, 4) + '-anim';
-            let asteroidX = Phaser.Math.RND.integerInRange(0, this.WORLD_WIDTH);
-            let asteroidY = Phaser.Math.RND.integerInRange(0, this.WORLD_HEIGHT);
-            var asteroid = new Asteroid({ scene: this, x: asteroidX, y: asteroidY, key: asteroidKey, type: 'BIG' });
+        for (let i = 0; i < this.manifest.asteroids.length; i++) {
+            const a = this.manifest.asteroids[i];
+            const asteroid = new Asteroid({ scene: this, x: a.x, y: a.y, key: `asteroid_${i}`, type: 'BIG', manifest: a });
         }
 
         this.collider_ship_asteroids = this.physics.add.collider(this.ship, this.asteroidsGroup, this.collideShipAsteroid);
@@ -264,21 +281,13 @@ class GameScene extends Phaser.Scene {
             this.radar.update();
             this.minimap.update(this.WORLD_WIDTH, this.WORLD_HEIGHT);
 
-            
+
             this.asteroidsArray.forEach(function (asteroid) {
                 asteroid.update();
             });
             this.ship.update(this.player_keys, time, delta);
 
             this.updateScore(time)
-
-            if (typeof this.ship !== 'undefined' && typeof this.ship.body !== 'undefined') {
-                this.bg.tilePositionX += this.ship.body.deltaX() * 0.5;
-                this.bg.tilePositionY += this.ship.body.deltaY() * 0.5;
-
-                this.stars.tilePositionX += this.ship.body.deltaX() * 2;
-                this.stars.tilePositionY += this.ship.body.deltaY() * 2;
-            }
         }
     }
 }
