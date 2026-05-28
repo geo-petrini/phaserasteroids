@@ -70,7 +70,7 @@ export default class Ship extends Phaser.GameObjects.Sprite {
 
         if (config.lateralThrusters) {
             for (const t of config.lateralThrusters) {
-                const side = t.x >= 0 ? 1 : -1
+                const side = t.y >= 0 ? 1 : -1
                 const e = config.scene.add.particles(0, 0, 'smoke', {
                     speed: { min: 10, max: 40 },
                     angle: {

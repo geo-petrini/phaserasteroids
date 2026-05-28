@@ -10,7 +10,7 @@ const CATEGORIES = [
   {
     name: 'HULL', color: 0xf0d060,
     items: [
-      { id: 'cabin',       label: 'Cabin',        w: 1, h: 2 },
+      { id: 'cabin',       label: 'Cabin',        w: 2, h: 1 },
       { id: 'connector_s', label: 'Connector S',  w: 1, h: 1 },
       { id: 'connector_m', label: 'Connector M',  w: 2, h: 2 },
       { id: 'connector_l', label: 'Connector L',  w: 3, h: 3 },
@@ -20,16 +20,16 @@ const CATEGORIES = [
     name: 'GENERATOR', color: 0x4488ff,
     items: [
       { id: 'gen1', label: 'Gen L1', w: 1, h: 1, energyGen: 2 },
-      { id: 'gen2', label: 'Gen L2', w: 1, h: 2, energyGen: 5 },
-      { id: 'gen3', label: 'Gen L3', w: 1, h: 3, energyGen: 8 },
+      { id: 'gen2', label: 'Gen L2', w: 2, h: 1, energyGen: 5 },
+      { id: 'gen3', label: 'Gen L3', w: 3, h: 1, energyGen: 8 },
     ],
   },
   {
     name: 'THRUSTERS', color: 0xff6644,
     items: [
       { id: 'thrust_f1', label: 'Fwd L1', w: 1, h: 1, accel: 20,  particleColor: 0xff4444 },
-      { id: 'thrust_f2', label: 'Fwd L2', w: 1, h: 2, accel: 55,  particleColor: 0xffff44 },
-      { id: 'thrust_f3', label: 'Fwd L3', w: 1, h: 3, accel: 70,  particleColor: 0x4488ff },
+      { id: 'thrust_f2', label: 'Fwd L2', w: 2, h: 1, accel: 55,  particleColor: 0xffff44 },
+      { id: 'thrust_f3', label: 'Fwd L3', w: 3, h: 1, accel: 70,  particleColor: 0x4488ff },
       { id: 'thrust_l1', label: 'Lat L1', w: 1, h: 1, rotation: 20, particleColor: 0xff4444 },
       { id: 'thrust_l2', label: 'Lat L2', w: 1, h: 1, rotation: 55, particleColor: 0xffff44 },
     ],
@@ -39,10 +39,10 @@ const CATEGORIES = [
     items: [
       { id: 'shield_gen1', label: 'Gen L1', w: 1, h: 1, recharge: 0.5 },
       { id: 'shield_gen2', label: 'Gen L2', w: 2, h: 2, recharge: 0.67 },
-      { id: 'shield_gen3', label: 'Gen L3', w: 2, h: 3, recharge: 2 },
+      { id: 'shield_gen3', label: 'Gen L3', w: 3, h: 2, recharge: 2 },
       { id: 'shield_cap1', label: 'Cap L1', w: 1, h: 1, capacity: 40 },
-      { id: 'shield_cap2', label: 'Cap L2', w: 2, h: 1, capacity: 90 },
-      { id: 'shield_cap3', label: 'Cap L3', w: 3, h: 2, capacity: 150 },
+      { id: 'shield_cap2', label: 'Cap L2', w: 1, h: 2, capacity: 90 },
+      { id: 'shield_cap3', label: 'Cap L3', w: 2, h: 3, capacity: 150 },
     ],
   },
   {
