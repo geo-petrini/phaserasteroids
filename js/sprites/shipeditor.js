@@ -54,6 +54,18 @@ const CATEGORIES = [
   },
 ]
 
+const _findElementById = (id) => {
+  for (const cat of CATEGORIES) {
+    for (const item of cat.items) {
+      if (item.id === id) {
+        item.color = cat.color
+        return item
+      }
+    }
+  }
+  return null
+}
+
 export default class ShipEditor {
   constructor(scene) {
     this.scene = scene
@@ -71,6 +83,7 @@ export default class ShipEditor {
     this.createTabs()
     this.drawPalettePage()
     this.createBuildButton()
+    this._loadGridFromShipData()
   }
 
   cellToPixel(col, row) {
@@ -170,9 +183,27 @@ export default class ShipEditor {
     this.gridEntries = this.gridEntries.filter(e => e !== entry)
   }
 
+  _loadGridFromShipData() {
+    const data = this.scene.registry.get('shipData') ||
+                 JSON.parse(localStorage.getItem('phaserAsteroidsShip') || 'null')
+    if (!data || !data.gridLayout) return
+    for (const entry of data.gridLayout) {
+      const el = _findElementById(entry.id)
+      if (el) this.place(el, entry.col, entry.row)
+    }
+  }
+
+  clearGrid() {
+    for (const e of [...this.gridEntries]) {
+      this.removeEntry(e)
+    }
+    this.drawGrid()
+    this.showMessage('Grid cleared', 0xff8844)
+  }
+
   drawGrid() {
     const g = this.bg
-    g.clear()
+    // g.clear()
     g.fillStyle(0x0a0a1a, 1)
     g.fillRect(GRID_X - 10, GRID_Y - 10,
       COLS * (CELL + GAP) + GAP + 20,
@@ -303,15 +334,22 @@ export default class ShipEditor {
     const bx = PALETTE_X
     const by = GRID_Y + ROWS * (CELL + GAP) + GAP + 40
 
-    const btn = this.scene.add.rectangle(bx + 50, by, 100, 30, 0x44aa44)
-    btn.setInteractive({ useHandCursor: true })
-    const lbl = this.scene.add.text(bx + 50, by, 'BUILD SHIP', {
+    const buildBtn = this.scene.add.rectangle(bx + 50, by, 100, 30, 0x44aa44)
+    buildBtn.setInteractive({ useHandCursor: true })
+    const buildLbl = this.scene.add.text(bx + 50, by, 'BUILD SHIP', {
       fontSize: '12px', color: '#fff',
     }).setOrigin(0.5)
+    buildBtn.on('pointerdown', () => this.buildShip())
 
-    btn.on('pointerdown', () => this.buildShip())
+    const clearBtn = this.scene.add.rectangle(bx + 160, by, 70, 30, 0xcc3333)
+    clearBtn.setInteractive({ useHandCursor: true })
+    const clearLbl = this.scene.add.text(bx + 160, by, 'CLEAR', {
+      fontSize: '11px', color: '#fff',
+    }).setOrigin(0.5)
+    clearBtn.on('pointerdown', () => this.clearGrid())
 
-    this.buildBtn = { btn, lbl }
+    this.buildBtn = { btn: buildBtn, lbl: buildLbl }
+    this.clearBtn = { btn: clearBtn, lbl: clearLbl }
   }
 
   validate() {
@@ -342,6 +380,13 @@ export default class ShipEditor {
     const cx = (e.col - minCol) * (CELL + GAP) + GAP + (e.el.w * (CELL + GAP) - GAP) / 2
     const cy = (e.row - minRow) * (CELL + GAP) + GAP + (e.el.h * (CELL + GAP) - GAP) / 2
     return { x: cx, y: cy }
+  }
+
+  _saveShip(stats){
+    this.scene.registry.set('shipData', stats)
+    this.scene.registry.set('shipDataVersion', (this.scene.registry.get('shipDataVersion') || 0) + 1)
+
+    localStorage.setItem('phaserAsteroidsShip', JSON.stringify(stats))
   }
 
   buildShip() {
@@ -396,15 +441,18 @@ export default class ShipEditor {
     stats.forwardThrusters = fwdThrusters
     stats.lateralThrusters = latThrusters
     stats.weaponPositions = weapons
+    stats.gridLayout = this.gridEntries.map(e => ({
+      id: e.el.id, col: e.col, row: e.row,
+    }))
 
-    this.scene.registry.set('shipData', stats)
-    this.scene.registry.set('shipDataVersion', (this.scene.registry.get('shipDataVersion') || 0) + 1)
+    this._saveShip(stats)
 
-    localStorage.setItem('phaserAsteroidsShip', JSON.stringify(stats))
 
     this.shipBuilt = true
     this.showMessage('Ship built! Press O to play', 0x44ff44)
   }
+
+
 
   computeStats() {
     let accel = 0, rotation = 0, energyGen = 0

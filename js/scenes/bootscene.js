@@ -40,16 +40,8 @@ class BootScene extends Phaser.Scene {
             text.destroy();
             console.log('load complete');
 
-            const saved = localStorage.getItem('phaserAsteroidsShip')
-            if (saved) {
-                const data = JSON.parse(saved)
-                this.registry.set('shipData', data)
-                this.registry.set('shipDataVersion', 1)
-                this.scene.start('GameScene');
-                this.scene.start('ShipConfigScene');
-            } else {
-                this.scene.start('ShipConfigScene');
-            }
+            this._loadShip()
+            this.scene.start('ShipConfigScene');
         });
 
         this.load.image('background', 'assets/nebula.jpg');
@@ -69,6 +61,19 @@ class BootScene extends Phaser.Scene {
         this.load.audio('explosion_short', ['sounds/explosion_short.wav']);
         this.load.audio('asteroid_explosion_1', ['sounds/asteroid_explosion_1.wav']);
         this.cameras.main.fadeOut(150);
+    }
+
+    /*
+    ship is saved in localStorage but then loaded in global game registry
+    */
+    _loadShip(){
+        const saved = localStorage.getItem('phaserAsteroidsShip')
+        if (saved) {
+            const data = JSON.parse(saved)
+            //registry is an instance of the global Game https://docs.phaser.io/phaser/concepts/data-manager#game-data-manager
+            this.registry.set('shipData', data)
+            this.registry.set('shipDataVersion', 1)
+        }
     }
 }
 

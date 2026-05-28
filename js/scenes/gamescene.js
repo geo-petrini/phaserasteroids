@@ -30,15 +30,14 @@ class GameScene extends Phaser.Scene {
         this.ASTEROIDS_INITIALIZED = false;
         this.MENU_INITIALIZED = false;
         this.cameraZoomIndex = 0;
-        this._appliedShipVersion = 0;
 
         this.createBackground();
         this.createKeys();
 
+        this.createSounds();
+
         const shipData = this.registry.get('shipData')
         this.createShip(shipData || {})
-
-        this.createSounds();
 
         this.ui_container = this.add.container()
         this.ui_container.setScrollFactor(0)
@@ -48,9 +47,6 @@ class GameScene extends Phaser.Scene {
         this.minimap = new MiniMap(this);
 
         this.ui_container.add(this.text)
-
-        this._pendingCustomShip = null
-        this._pendingShipVersion = 0
 
         console.log('gamescene ready');
     }
@@ -84,12 +80,16 @@ class GameScene extends Phaser.Scene {
     createShip(shipData) {
         const def = { scene: this, key: 'ship', texture: 'space', x: this.WORLD_WIDTH / 2, y: this.WORLD_HEIGHT / 2, keys: this.player_keys }
 
-        if (shipData.textureKey) {
+        if (shipData.textureKey && this.textures.exists(shipData.textureKey)) {
             def.texture = shipData.textureKey
             def.scale = this.computeShipScale(shipData)
         }
         if (shipData.accel) def.accel = shipData.accel
         if (shipData.rotation) def.rotation = shipData.rotation
+        if (shipData.energyGen) def.energyGen = shipData.energyGen
+        if (shipData.forwardThrusters) def.forwardThrusters = shipData.forwardThrusters
+        if (shipData.lateralThrusters) def.lateralThrusters = shipData.lateralThrusters
+        if (shipData.weaponPositions) def.weaponPositions = shipData.weaponPositions
 
         this.ship = new Ship(def)
 
@@ -104,8 +104,11 @@ class GameScene extends Phaser.Scene {
     }
 
     computeShipScale(shipData) {
-        const tex = this.textures.get(shipData.textureKey)
-        const w = tex.getSourceImage().width
+        let w = 48
+        if (this.textures.exists(shipData.textureKey)) {
+            const tex = this.textures.get(shipData.textureKey)
+            w = tex.getSourceImage().width
+        }
         const desiredW = 48
         return Math.min(1, desiredW / w)
     }
@@ -226,13 +229,6 @@ class GameScene extends Phaser.Scene {
 
     update(time, delta) {
 
-        if (this._pendingCustomShip && this._appliedShipVersion !== this._pendingShipVersion) {
-            const d = this._pendingCustomShip
-            this._appliedShipVersion = this._pendingShipVersion
-            this._pendingCustomShip = null
-            this.rebuildShip(d)
-        }
-
         if (this.ASTEROIDS_INITIALIZED == true) {
             this.collider_ship_asteroids.active = this.options.player_enable_ship_asteroids_collision;
             this.collider_bullets_asteroids.active = this.options.player_enable_bullets_asteroids_collision;
@@ -265,17 +261,17 @@ class GameScene extends Phaser.Scene {
 
             if (this.input.keyboard.checkDown(this.toggleMenuKey, 250)) {
                 this.input.stopPropagation();
-                this.scene.switch('ShipConfigScene');
+                this.scene.start('ShipConfigScene');
             }
 
             this.radar.update();
             this.minimap.update(this.WORLD_WIDTH, this.WORLD_HEIGHT);
 
-            this.ship.update(this.player_keys, time, delta);
-
+            
             this.asteroidsArray.forEach(function (asteroid) {
                 asteroid.update();
             });
+            this.ship.update(this.player_keys, time, delta);
 
             this.updateScore(time)
 

@@ -19,12 +19,13 @@ export default class Ship extends Phaser.GameObjects.Sprite {
 
         this.ROTATION = config.rotation || 180
         this.ACCELERATION = config.accel || 40
+        this.ENERGY_GEN = config.energyGen || 0
         this.TURBO_ACCELERATION_INCREMENT = 5
         this.FIRE_INTERVALL = 15;
         this.HULL_REPAIR_INTERVALL = 10;
         this.HULL_REPAIR_AMOUNT = 0.001;
-        this.WEAPONS_RECHARGE_INTERVALL = 10;
-        this.WEAPONS_RECHARGE_AMOUNT = 0.1;
+        this.ENERGY_RECHARGE_INTERVALL = 10;
+        // this.WEAPONS_RECHARGE_AMOUNT = 0.1;
         this.WEAPONS_BULLET_DISCHARGE_AMOUNT = 5;
         this.TURBO_INTERVALL = 2000;
 
@@ -50,19 +51,20 @@ export default class Ship extends Phaser.GameObjects.Sprite {
         this.forwardEmitters = []
         this.lateralEmitters = []
 
+        const ps = this.scaleX
+
         if (config.forwardThrusters) {
             for (const t of config.forwardThrusters) {
                 const e = config.scene.add.particles(0, 0, 'smoke', {
-                    speed: { min: 10, max: 50 },
+                    speed: { min: 10 * ps, max: 50 * ps },
                     angle: {
                         onEmit: () => (this.angle + 180) + Phaser.Math.Between(-20, 20),
                     },
-                    scale: { start: 1, end: 0.2 },
+                    scale: { start: ps, end: ps * 0.2 },
                     alpha: { start: 0.6, end: 0 },
                     lifespan: 400,
                     emitting: false,
                     blendMode: 'ADD',
-                    tint: t.color,
                 })
                 this.forwardEmitters.push({ emitter: e, ox: t.x, oy: t.y })
             }
@@ -72,16 +74,15 @@ export default class Ship extends Phaser.GameObjects.Sprite {
             for (const t of config.lateralThrusters) {
                 const side = t.y >= 0 ? 1 : -1
                 const e = config.scene.add.particles(0, 0, 'smoke', {
-                    speed: { min: 10, max: 40 },
+                    speed: { min: 10 * ps, max: 40 * ps },
                     angle: {
                         onEmit: () => (this.angle + 90 * side) + Phaser.Math.Between(-15, 15),
                     },
-                    scale: { start: 0.8, end: 0.1 },
+                    scale: { start: ps * 0.8, end: ps * 0.1 },
                     alpha: { start: 0.5, end: 0 },
                     lifespan: 300,
                     emitting: false,
                     blendMode: 'ADD',
-                    tint: t.color,
                 })
                 this.lateralEmitters.push({ emitter: e, ox: t.x, oy: t.y, side })
             }
@@ -92,6 +93,12 @@ export default class Ship extends Phaser.GameObjects.Sprite {
         this.fixedWeaponOffsets = this.weaponOffsets.filter(w => !w.isTracking)
 
         this.trackTurretAngles = this.trackWeaponOffsets.map(() => 0)
+
+        if (this.trackWeaponOffsets.length > 0) {
+            this.trackGraphics = config.scene.add.graphics()
+            this.trackGraphics.setDepth(2)
+            this.trackGraphics.alpha = 0.5
+        }
 
         this.assignKeys()
         console.log(this)
@@ -117,6 +124,7 @@ export default class Ship extends Phaser.GameObjects.Sprite {
         this.visible = false;
         for (const fe of this.forwardEmitters) { fe.emitter.emitting = false; fe.emitter.destroy() }
         for (const le of this.lateralEmitters) { le.emitter.emitting = false; le.emitter.destroy() }
+        if (this.trackGraphics) this.trackGraphics.destroy()
         fx.createSmokeFX(this.x, this.y, this.config.scene);
         fx.createFlameFX(this.x, this.y, this.config.scene);
         fx.createBlastFX(this.x, this.y, this.config.scene);
@@ -137,7 +145,7 @@ export default class Ship extends Phaser.GameObjects.Sprite {
 
     _rechargeEnergy() {
         if (this.energy_hb.value < 100) {
-            this.energy_hb.increase(this.WEAPONS_RECHARGE_AMOUNT)
+            this.energy_hb.increase(this.ENERGY_GEN)
         }
     }
 
@@ -185,11 +193,12 @@ export default class Ship extends Phaser.GameObjects.Sprite {
 
     _fire(time) {
         if (this.energy_hb.value > this.WEAPONS_BULLET_DISCHARGE_AMOUNT) {
+            const s = this.scaleX
             for (const off of this.fixedWeaponOffsets) {
                 const cos = Math.cos(this.rotation)
                 const sin = Math.sin(this.rotation)
-                const wx = this.x + off.x * cos - off.y * sin
-                const wy = this.y + off.x * sin + off.y * cos
+                const wx = this.x + (off.x * s) * cos - (off.y * s) * sin
+                const wy = this.y + (off.x * s) * sin + (off.y * s) * cos
                 const bullet = this.bullets.get()
                 if (bullet) {
                     bullet.fire(this, wx, wy)
@@ -204,15 +213,26 @@ export default class Ship extends Phaser.GameObjects.Sprite {
         }
     }
 
-    _fireTracking(time) {
-        if (this.energy_hb.value > this.WEAPONS_BULLET_DISCHARGE_AMOUNT) {
-            const asteroids = this.config.scene.asteroidsArray
-            let anyFired = false
-            for (let i = 0; i < this.trackWeaponOffsets.length; i++) {
-                const off = this.trackWeaponOffsets[i]
-                const target = this._findTarget(asteroids)
-                if (!target) continue
+    _assignTargets(asteroids) {
+        if (!asteroids) return this.trackWeaponOffsets.map(() => null)
+        const sorted = [...asteroids].sort((a, b) => {
+            const da = Phaser.Math.Distance.Between(this.x, this.y, a.x, a.y)
+            const db = Phaser.Math.Distance.Between(this.x, this.y, b.x, b.y)
+            return da - db
+        })
+        return this.trackWeaponOffsets.map((_, i) => sorted[i] || null)
+    }
 
+    _updateTrackingVisuals(asteroids) {
+        if (!this.trackWeaponOffsets.length) return
+        this.trackGraphics.clear()
+
+        const targets = this._assignTargets(asteroids)
+        const s = this.scaleX
+
+        for (let i = 0; i < this.trackWeaponOffsets.length; i++) {
+            const target = targets[i]
+            if (target) {
                 const dx = target.x - this.x
                 const dy = target.y - this.y
                 const desiredAngle = Math.atan2(dy, dx)
@@ -223,11 +243,47 @@ export default class Ship extends Phaser.GameObjects.Sprite {
                 } else {
                     this.trackTurretAngles[i] = desiredAngle
                 }
+            }
 
+            const off = this.trackWeaponOffsets[i]
+            const cos = Math.cos(this.rotation)
+            const sin = Math.sin(this.rotation)
+            const wx = this.x + off.x * s * cos - off.y * s * sin
+            const wy = this.y + off.x * s * sin + off.y * s * cos
+
+            this.trackGraphics.lineStyle(1, 0xff0000, 0.6)
+            this.trackGraphics.beginPath()
+            this.trackGraphics.moveTo(wx, wy)
+            this.trackGraphics.lineTo(
+                wx + Math.cos(this.trackTurretAngles[i]) * 150,
+                wy + Math.sin(this.trackTurretAngles[i]) * 150
+            )
+            this.trackGraphics.strokePath()
+        }
+
+        for (const target of targets) {
+            if (!target) continue
+            const size = 8
+            this.trackGraphics.lineStyle(2, 0xff0000, 1)
+            this.trackGraphics.beginPath()
+            this.trackGraphics.moveTo(target.x - size, target.y - size)
+            this.trackGraphics.lineTo(target.x + size, target.y + size)
+            this.trackGraphics.moveTo(target.x + size, target.y - size)
+            this.trackGraphics.lineTo(target.x - size, target.y + size)
+            this.trackGraphics.strokePath()
+        }
+    }
+
+    _fireTracking(time) {
+        if (this.energy_hb.value > this.WEAPONS_BULLET_DISCHARGE_AMOUNT) {
+            const s = this.scaleX
+            let anyFired = false
+            for (let i = 0; i < this.trackWeaponOffsets.length; i++) {
+                const off = this.trackWeaponOffsets[i]
                 const cos = Math.cos(this.rotation)
                 const sin = Math.sin(this.rotation)
-                const wx = this.x + off.x * cos - off.y * sin
-                const wy = this.y + off.x * sin + off.y * cos
+                const wx = this.x + off.x * s * cos - off.y * s * sin
+                const wy = this.y + off.x * s * sin + off.y * s * cos
                 const bullet = this.bullets.get()
                 if (bullet) {
                     bullet.fire(this, wx, wy, this.trackTurretAngles[i])
@@ -243,28 +299,14 @@ export default class Ship extends Phaser.GameObjects.Sprite {
         }
     }
 
-    _findTarget(asteroids) {
-        let best = null
-        let bestDist = Infinity
-        for (const a of asteroids) {
-            const dx = a.x - this.x
-            const dy = a.y - this.y
-            const dist = dx * dx + dy * dy
-            if (dist > 0 && dist < bestDist) {
-                bestDist = dist
-                best = a
-            }
-        }
-        return best
-    }
-
     _updateThrusterEmitters(isAccelerating, rotDir) {
+        const s = this.scaleX
         for (const fe of this.forwardEmitters) {
             const cos = Math.cos(this.rotation)
             const sin = Math.sin(this.rotation)
             fe.emitter.setPosition(
-                this.x + fe.ox * cos - fe.oy * sin,
-                this.y + fe.ox * sin + fe.oy * cos
+                this.x + (fe.ox * s) * cos - (fe.oy * s) * sin,
+                this.y + (fe.ox * s) * sin + (fe.oy * s) * cos
             )
             fe.emitter.emitting = isAccelerating
         }
@@ -273,8 +315,8 @@ export default class Ship extends Phaser.GameObjects.Sprite {
             const cos = Math.cos(this.rotation)
             const sin = Math.sin(this.rotation)
             le.emitter.setPosition(
-                this.x + le.ox * cos - le.oy * sin,
-                this.y + le.ox * sin + le.oy * cos
+                this.x + (le.ox * s) * cos - (le.oy * s) * sin,
+                this.y + (le.ox * s) * sin + (le.oy * s) * cos
             )
             le.emitter.emitting = rotDir !== 0
         }
@@ -320,6 +362,7 @@ export default class Ship extends Phaser.GameObjects.Sprite {
             }
 
             this._updateThrusterEmitters(isAccel, rotDir)
+            this._updateTrackingVisuals(this.config.scene.asteroidsArray)
 
             if (keys.fire.isDown && time > this.lastFired) {
                 this._fire(time)
@@ -332,7 +375,7 @@ export default class Ship extends Phaser.GameObjects.Sprite {
             }
             if (time > this.lastWeaponsRecharge) {
                 this._rechargeEnergy()
-                this.lastWeaponsRecharge = time + this.WEAPONS_RECHARGE_INTERVALL;
+                this.lastWeaponsRecharge = time + this.ENERGY_RECHARGE_INTERVALL;
             }
         }
     }
