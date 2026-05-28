@@ -1,5 +1,14 @@
 import * as fx from './fx.js';
 export default class Asteroid extends Phaser.GameObjects.Sprite {
+    static pending = [];
+
+    static spawnPending() {
+        for (const cfg of Asteroid.pending) {
+            new Asteroid(cfg);
+        }
+        Asteroid.pending = [];
+    }
+
     constructor(config) {
         super(config.scene, config.x, config.y, config.key);
 
@@ -11,30 +20,33 @@ export default class Asteroid extends Phaser.GameObjects.Sprite {
 
         if (this.type == 'BIG') {
             this.setScale(Phaser.Math.FloatBetween(1.2, 0.8));
-            this.body.setMaxVelocity(100);
             this.vel = new Phaser.Math.Vector2(Phaser.Math.RND.integerInRange(-30, 30), Phaser.Math.RND.integerInRange(-30, 30));
             this.avel = Phaser.Math.FloatBetween(-30, 30)
         }
         if (this.type == 'MEDIUM') {
             this.setScale(Phaser.Math.FloatBetween(0.5, 0.3));
-            this.body.setMaxVelocity(150);
             this.vel = new Phaser.Math.Vector2(Phaser.Math.RND.integerInRange(-40, 40), Phaser.Math.RND.integerInRange(-40, 40));
             this.avel = Phaser.Math.FloatBetween(-40, 40)
         }
         if (this.type == 'SMALL') {
             this.setScale(Phaser.Math.FloatBetween(0.25, 0.20));
-            this.body.setMaxVelocity(200);
             this.vel = new Phaser.Math.Vector2(Phaser.Math.RND.integerInRange(-60, 60), Phaser.Math.RND.integerInRange(-60, 60));
             this.avel = Phaser.Math.FloatBetween(-60, 60)
         }
 
-        this.setRotation(Phaser.Math.FloatBetween(0, 1));
-        this.body.setCircle(Math.max(this.displayWidth, this.displayHeight) / 2);
-
-        this.firstRound = true;
-
         this.config.scene.asteroidsGroup.add(this);
         this.config.scene.asteroidsArray.push(this);
+
+        this.setRotation(Phaser.Math.FloatBetween(0, 1));
+
+        //setting circle and velocity after asteroidsGroup to avoid body reset
+        this.body.setCircle(Math.max(this.displayWidth, this.displayHeight) / 2);
+
+        if (this.type == 'BIG') this.body.setMaxVelocity(100);
+        if (this.type == 'MEDIUM') this.body.setMaxVelocity(150);
+        if (this.type == 'SMALL') this.body.setMaxVelocity(200);
+
+        this.firstRound = true;
     }
 
     update() {
@@ -52,7 +64,7 @@ export default class Asteroid extends Phaser.GameObjects.Sprite {
         if (this.type == 'SMALL') { childType = 'DUST' }
 
         if (childType != 'DUST') {
-            var asteroid = new Asteroid({ scene: this.config.scene, key: this.config.key, x: this.x, y: this.y, type: childType });
+            Asteroid.pending.push({ scene: this.config.scene, key: this.config.key, x: this.x, y: this.y, type: childType });
         }
 
         fx.createSmokeFX(this.x, this.y, this.config.scene)

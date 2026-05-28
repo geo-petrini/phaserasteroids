@@ -20,13 +20,11 @@ export default class Bullet extends Phaser.Physics.Arcade.Image {
 
         this.setPosition(x, y)
         this.body.reset(x, y)
-        this.body.setSize(this.width, this.height, true)
+        this.body.setSize(Math.max(this.width, 6), Math.max(this.height, 6), true)
         this.setAngle(Phaser.Math.RadToDeg(a))
 
         const speed = opts.speed !== undefined ? opts.speed : this.speed
         this.scene.physics.velocityFromRotation(a, speed, this.body.velocity)
-        this.body.velocity.x *= 2
-        this.body.velocity.y *= 2
     }
 
     fireAt(ship, angleRad) {

@@ -3,7 +3,7 @@ import WeaponComponent from './WeaponComponent.js'
 export default class ShipWeapons {
   constructor(weaponPositions, shipRef) {
     this.shipRef = shipRef
-    this.weapons = (weaponPositions || []).map(off => new WeaponComponent(off, shipRef))
+    this.weapons = (weaponPositions || []).map(cfg => new WeaponComponent(cfg, shipRef))
     this.trackingWeapons = this.weapons.filter(w => w.isTracking)
     this.fixedWeapons = this.weapons.filter(w => !w.isTracking)
     this._createBulletGroups()

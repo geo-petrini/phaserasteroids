@@ -10,7 +10,7 @@
     "fireIntervall": 15,
     "bulletsPool": 10,
     "bulletColor": "0xaaaaff",
-    "bulletSize": "1x5",
+    "bulletSize": "2x5",
     "bulletSpeed": 1000,
     "bulletLifespan": 500
   },
@@ -25,8 +25,9 @@
     "fireIntervall": 30,
     "bulletsPool": 5,
     "bulletColor": "0xaaffbb",
-    "bulletSize": "2x4",
+    "bulletSize": "2x8",
     "bulletSpeed": 750,
-    "bulletLifespan": 400  
+    "bulletLifespan": 400,
+    "laserLength":100
   }
 ]

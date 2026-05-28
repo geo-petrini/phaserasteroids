@@ -1,19 +1,19 @@
 import Bullet from '../sprites/bullet.js'
 
 export default class WeaponComponent {
-  constructor(offset, shipRef) {
+  constructor(cfg, shipRef) {
     this.shipRef = shipRef
-    this.x = offset.x
-    this.y = offset.y
-    this.isTracking = offset.isTracking
-    this.fireInterval = offset.fireIntervall || 15
-    this.energyPerShot = offset.energyUsage || 5
-    this.bulletsPool = offset.bulletsPool || 10
-    this.bulletSpeed = offset.bulletSpeed || 1000
-    this.bulletLifespan = offset.bulletLifespan || 500
-    this.bulletColorParsed = offset.bulletColor ? Number(offset.bulletColor) : null
-    if (offset.bulletSize) {
-      const parts = offset.bulletSize.split('x').map(Number)
+    this.x = cfg.x
+    this.y = cfg.y
+    this.isTracking = cfg.isTracking
+    this.fireInterval = cfg.fireIntervall || 15
+    this.energyPerShot = cfg.energyUsage || 5
+    this.bulletsPool = cfg.bulletsPool || 10
+    this.bulletSpeed = cfg.bulletSpeed || 1000
+    this.bulletLifespan = cfg.bulletLifespan || 500
+    this.bulletColorParsed = cfg.bulletColor ? Number(cfg.bulletColor) : null
+    if (cfg.bulletSize) {
+      const parts = cfg.bulletSize.split('x').map(Number)
       this.bulletScaleX = parts[0]
       this.bulletScaleY = parts[1] || parts[0]
     } else {
@@ -22,6 +22,7 @@ export default class WeaponComponent {
     this.nextFireTime = 0
     this.turretAngle = 0
     this.group = null
+    this.laserLength = cfg.laserLength || 0
   }
 
   createBulletGroup(scene) {
@@ -50,7 +51,12 @@ export default class WeaponComponent {
         lifespan: this.bulletLifespan,
       })
       if (this.bulletColorParsed !== null) bullet.setTint(this.bulletColorParsed)
-      if (this.bulletScaleX !== null) bullet.setSize(this.bulletScaleX, this.bulletScaleY)
+      if (this.bulletScaleX !== null) {
+        bullet.setDisplaySize(this.bulletScaleX, this.bulletScaleY)
+        const bw = Math.max(this.bulletScaleX, 6)
+        const bh = Math.max(this.bulletScaleY, 6)
+        bullet.body.setSize(bw, bh, true)
+      }
       bullet.setDepth(this.shipRef.depth - 1)
     }
     sounds['laser'].play({ volume })

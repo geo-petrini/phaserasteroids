@@ -67,8 +67,8 @@ export default class ShipTargeting {
       this.trackGraphics.beginPath()
       this.trackGraphics.moveTo(wx, wy)
       this.trackGraphics.lineTo(
-        wx + Math.cos(w.turretAngle) * 150,
-        wy + Math.sin(w.turretAngle) * 150
+        wx + Math.cos(w.turretAngle) * (w.laserLength || 50),
+        wy + Math.sin(w.turretAngle) * (w.laserLength || 50)
       )
       this.trackGraphics.strokePath()
     }
@@ -76,7 +76,7 @@ export default class ShipTargeting {
 
   _drawTargetCrosses(targets) {
     for (const target of targets) {
-      if (!target) continue
+      if (!target || !target.active) continue
       const size = 8
       this.trackGraphics.lineStyle(2, 0xff0000, 1)
       this.trackGraphics.beginPath()

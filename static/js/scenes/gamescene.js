@@ -242,6 +242,7 @@ class GameScene extends Phaser.Scene {
     }
 
     update(time, delta) {
+        Asteroid.spawnPending();
 
         if (this.ASTEROIDS_INITIALIZED == true) {
             this.collider_ship_asteroids.active = this.options.player_enable_ship_asteroids_collision;
